@@ -1,0 +1,87 @@
+name: Actualizar SAT Caldas
+on:
+  schedule:
+    - cron: '17 */3 * * *'   # cada 3 h: puntos de calor FIRMS e IDEAM (+ índice de vigilancia)
+    - cron: '40 10 * * *'    # diario 05:40 Colombia: deforestación GFW, clima Open-Meteo, índice
+    - cron: '5 12 * * 1'     # lunes: especies GBIF / SiB
+    - cron: '30 12 1 * *'    # día 1 de cada mes: capas de referencia (EEP, resguardos, vías, ríos, DTD IDEAM)
+  workflow_dispatch:
+    inputs:
+      tarea:
+        description: 'Qué actualizar'
+        type: choice
+        default: todo
+        options: [todo, calor, diario, especies, capas]
+permissions:
+  contents: write
+concurrency:
+  group: actualizar-datos
+  cancel-in-progress: false
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      PYTHONUNBUFFERED: '1'
+      NORM_POR_CORRIDA: '25'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Elegir tareas
+        id: t
+        run: |
+          S="${{ github.event.schedule }}"; T="${{ inputs.tarea }}"
+          [ -z "$T" ] && T=todo
+          calor=0; diario=0; especies=0; capas=0
+          case "$S" in
+            '17 */3 * * *') calor=1 ;;
+            '40 10 * * *') calor=1; diario=1 ;;
+            '5 12 * * 1') especies=1 ;;
+            '30 12 1 * *') capas=1 ;;
+          esac
+          if [ -z "$S" ]; then
+            case "$T" in todo) calor=1; diario=1; especies=1; capas=1 ;; calor) calor=1 ;; diario) calor=1; diario=1 ;; especies) especies=1 ;; capas) capas=1 ;; esac
+          fi
+          echo "calor=$calor diario=$diario especies=$especies capas=$capas"
+          echo "calor=$calor" >> $GITHUB_OUTPUT; echo "diario=$diario" >> $GITHUB_OUTPUT
+          echo "especies=$especies" >> $GITHUB_OUTPUT; echo "capas=$capas" >> $GITHUB_OUTPUT
+      - name: Capas de referencia
+        if: steps.t.outputs.capas == '1'
+        run: python herramientas/preparar_capas.py
+        continue-on-error: true
+      - name: Puntos de calor FIRMS
+        if: steps.t.outputs.calor == '1'
+        run: python herramientas/actualizar_firms.py
+        continue-on-error: true
+      - name: Puntos de calor IDEAM
+        if: steps.t.outputs.calor == '1'
+        run: python herramientas/actualizar_ideam.py
+        continue-on-error: true
+      - name: Alertas de deforestación GFW
+        if: steps.t.outputs.diario == '1'
+        run: python herramientas/actualizar_deforestacion.py
+        continue-on-error: true
+      - name: Clima y anomalías (Open-Meteo)
+        if: steps.t.outputs.diario == '1'
+        run: python herramientas/actualizar_clima.py
+        continue-on-error: true
+      - name: Especies (GBIF / SiB Colombia)
+        if: steps.t.outputs.especies == '1'
+        run: python herramientas/actualizar_especies.py
+        continue-on-error: true
+      - name: Sitios a vigilar
+        if: steps.t.outputs.calor == '1' || steps.t.outputs.diario == '1'
+        run: python herramientas/calcular_vigilancia.py
+      - name: Guardar cambios
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add data
+          git diff --cached --quiet && exit 0
+          git commit -m "Datos SAT Caldas (actualización automática)"
+          for i in 1 2 3; do git pull --rebase -X theirs && git push && exit 0; sleep 5; done
+          exit 1

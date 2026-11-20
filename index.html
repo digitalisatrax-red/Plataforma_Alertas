@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SAT Caldas · Alertas</title>
+<meta name="description" content="Sistema de alertas tempranas de incendios y deforestación para Caldas: puntos de calor FIRMS e IDEAM, MapBiomas Fuego, alertas integradas GFW, histórico IDEAM y Hansen, clima Open-Meteo y sitios a vigilar.">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap">
+<link rel="stylesheet" href="app/sat.css">
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div>
+      <h1>SAT Caldas · Alertas tempranas</h1>
+      <div class="sub" id="estado-datos">Cargando datos…</div>
+    </div>
+    <div class="filtros">
+      <select id="f-mun" aria-label="Municipio"><option value="">Todo Caldas</option></select>
+      <select id="f-ver" aria-label="Vereda" disabled><option value="">Todas las veredas</option></select>
+      <button class="btn" id="b-tema" title="Cambiar tema claro/oscuro" aria-label="Cambiar tema">◐</button>
+    </div>
+  </header>
+  <div class="cuerpo">
+    <aside class="panel">
+      <nav class="tabs" role="tablist">
+        <button role="tab" data-tab="vigilar" aria-selected="true">Sitios a vigilar</button>
+        <button role="tab" data-tab="fuego">Fuego</button>
+        <button role="tab" data-tab="defo">Deforestación</button>
+        <button role="tab" data-tab="clima">Clima</button>
+        <button role="tab" data-tab="especies">Especies</button>
+        <button role="tab" data-tab="capas">Capas</button>
+      </nav>
+      <div class="contenido" id="contenido"></div>
+    </aside>
+    <div style="position:relative;min-height:0">
+      <div id="mapa"></div>
+      <div class="cargando" id="cargando">Cargando el sistema de alertas…</div>
+    </div>
+  </div>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/esri-leaflet@3.0.12/dist/esri-leaflet.js"></script>
+<script src="app/sat.js"></script>
+</body>
+</html>
