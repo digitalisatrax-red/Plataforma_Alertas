@@ -1,10 +1,10 @@
-# Vigía Fuego Caldas
+# Vigías del Fuego
 
 **Sistema de Alerta Temprana de Incendios y Deforestación del departamento de Caldas**
 
 Gobernación de Caldas – Secretaría de Medio Ambiente · Fundación para la Conservación de la Vida Silvestre en Colombia (FCV)
 
-Vigía Fuego Caldas integra en un visor web la información satelital, climática y territorial para la vigilancia de
+Vigías del Fuego integra en un visor web la información satelital, climática y territorial para la vigilancia de
 incendios de la cobertura vegetal y de la pérdida de bosque en los 27 municipios y 1.208 veredas de Caldas.
 
 ## Módulos

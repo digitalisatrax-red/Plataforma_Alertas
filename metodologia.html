@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Metodología · Vigía Fuego Caldas</title>
-<meta name="description" content="Metodología, fuentes de información, procesamiento, índice de priorización y limitaciones del Sistema de Alerta Temprana de Incendios y Deforestación Vigía Fuego Caldas.">
+<title>Metodología · Vigías del Fuego</title>
+<meta name="description" content="Metodología, fuentes de información, procesamiento, índice de priorización y limitaciones del Sistema de Alerta Temprana de Incendios y Deforestación Vigías del Fuego.">
 <meta name="theme-color" content="#0b6e4f">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%230b6e4f'/%3E%3Cpath d='M12 20c3.3 0 5.3-2.3 5.3-5.3 0-2.3-1.2-4-2.6-5.5-.3 1.4-1 2.3-2 2.7.2-2.5-1-4.8-3-6.2.2 2.4-1 4-2.3 5.4C6.5 12.3 6.7 13.2 6.7 14.7c0 3 2 5.3 5.3 5.3Z' fill='%23fff'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -63,7 +63,7 @@
 <header class="doc-top"><div class="in">
   <a href="index.html" class="marca" style="text-decoration:none;color:inherit">
     <div class="logo"><svg class="i" viewBox="0 0 24 24"><path d="M12 22c4.4 0 7-3 7-7 0-3-1.6-5.4-3.4-7.3-.4 1.8-1.4 3.1-2.6 3.6.2-3.3-1.3-6.4-4-8.3.3 3.2-1.4 5.3-3 7.2C4.7 11.8 5 13 5 15c0 4 2.6 7 7 7Z"/></svg></div>
-    <div><h1>Vigía <b>Fuego</b> Caldas</h1><div class="sub">Metodología y documentación</div></div>
+    <div><h1>Vigías del <b>Fuego</b></h1><div class="sub">Metodología y documentación</div></div>
   </a>
   <a class="btn" href="index.html#m=vigilancia&entrar=1" style="margin-left:12px"><svg class="i" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Volver al monitoreo</a>
   <div class="logos"><img src="app/img/logo-gobernacion.png" alt="Gobierno de Caldas · Secretaría de Medio Ambiente"><img src="app/img/logo-fcv.png" alt="FCV"></div>
@@ -71,7 +71,7 @@
 
 <section class="portadilla"><div class="in">
   <small>Documento técnico · versión 1.0 · noviembre de 2026</small>
-  <h1>Metodología del Sistema de Alerta Temprana <b>Vigía Fuego Caldas</b></h1>
+  <h1>Metodología del Sistema de Alerta Temprana <b>Vigías del Fuego</b></h1>
   <p>Fuentes de información, procesamiento, índice de priorización territorial, frecuencia de actualización, alcances y limitaciones del sistema de monitoreo de incendios de la cobertura vegetal y pérdida de bosque en el departamento de Caldas.</p>
   <div class="meta"><span>Área: departamento de Caldas (27 municipios · 1.208 veredas)</span><span>Sistema de referencia: WGS84 (EPSG:4326)</span><span>Actualización: automática, cada 3 horas a mensual</span></div>
 </div></section>
@@ -81,11 +81,11 @@
     <a href="#proposito">1. Propósito y alcance</a><a href="#arquitectura">2. Funcionamiento general</a><a href="#fuentes">3. Fuentes de información</a>
     <a href="#incendios">4. Incendios</a><a href="#deforestacion">5. Pérdida de bosque</a><a href="#clima">6. Clima y sequía</a>
     <a href="#indice">7. Índice de priorización</a><a href="#capas">8. Capas de referencia</a><a href="#actualizacion">9. Actualización</a>
-    <a href="#limitaciones">10. Alcances y limitaciones</a><a href="#protocolo">11. Uso operativo</a><a href="#glosario">12. Glosario</a><a href="#citar">13. Cómo citar y créditos</a>
+    <a href="#limitaciones">10. Alcances y limitaciones</a><a href="#protocolo">11. Uso operativo</a><a href="#campo">12. Operación de campo</a><a href="#glosario">13. Glosario</a><a href="#citar">14. Cómo citar y créditos</a>
   </nav>
   <article>
     <h2 id="proposito"><span class="nro">1</span>Propósito y alcance</h2>
-    <p>Vigía Fuego Caldas es un sistema de alerta temprana que integra, en una sola vista, la información satelital, climática y territorial necesaria para la <b>vigilancia estricta de incendios de la cobertura vegetal y de la pérdida de bosque</b> en el departamento de Caldas. Su propósito es apoyar la toma de decisiones de las autoridades ambientales, los organismos de gestión del riesgo y las organizaciones de conservación, en especial durante temporadas secas y eventos de El Niño.</p>
+    <p>Vigías del Fuego es un sistema de alerta temprana que integra, en una sola vista, la información satelital, climática y territorial necesaria para la <b>vigilancia estricta de incendios de la cobertura vegetal y de la pérdida de bosque</b> en el departamento de Caldas. Su propósito es apoyar la toma de decisiones de las autoridades ambientales, los organismos de gestión del riesgo y las organizaciones de conservación, en especial durante temporadas secas y eventos de El Niño.</p>
     <div class="tarjetas3">
       <div><b>Detectar</b><span>Puntos de calor y alertas de pérdida de bosque en cuanto son publicados por las agencias que los generan.</span></div>
       <div><b>Priorizar</b><span>Veredas donde coinciden condiciones climáticas adversas, antecedentes de fuego y presión sobre el bosque.</span></div>
@@ -227,9 +227,26 @@
       <li>Usar el módulo <b>Clima</b> para anticipar ventanas de calor y sequía en los próximos 16 días.</li>
       <li>Descargar las tablas (CSV) o generar el reporte imprimible para la coordinación interinstitucional.</li>
       <li>Registrar el resultado de la verificación en campo en la aplicación de reportes.</li>
+      <li>Coordinar la respuesta a través del módulo <b>Campo</b>, enviando alertas directamente a los guardabosques y haciendo seguimiento a su verificación.</li>
     </ol>
 
-    <h2 id="glosario"><span class="nro">12</span>Glosario</h2>
+    <h2 id="campo"><span class="nro">12</span>Conexión con la operación de campo</h2>
+    <p>El módulo <b>Campo</b> integra Vigías del Fuego con la <b>aplicación de guardabosques</b> en tiempo real a través de Supabase. Permite:</p>
+    <ul>
+      <li><b>Enviar alertas</b> desde cualquier punto del mapa, vereda priorizada o punto de calor a los equipos de campo.</li>
+      <li><b>Consultar reportes de incendio</b> ingresados por los guardabosques, incluyendo ubicación, fotografías, cobertura y causa probable.</li>
+      <li><b>Ver la posición del equipo</b> en el mapa y el estado de cada guardabosque (en línea o sin señal).</li>
+      <li><b>Seguir las novedades</b> registradas en la operación de campo.</li>
+    </ul>
+    <p>La conexión es bidireccional: las alertas enviadas desde esta plataforma llegan inmediatamente a la aplicación de los guardabosques, y sus verificaciones y reportes se reflejan aquí sin necesidad de recargar la página.</p>
+    <table><tbody>
+      <tr><td><b>Autenticación</b></td><td>Se usa la misma cuenta del tablero de campo (correo y contraseña). Sin sesión activa, solo se ven los reportes validados (vista pública).</td></tr>
+      <tr><td><b>Roles</b></td><td>Coordinadores y planeación pueden crear alertas y descartar las que no requieren atención.</td></tr>
+      <tr><td><b>Seguridad</b></td><td>Se usa exclusivamente la clave pública del proyecto; la seguridad es gestionada por las políticas de seguridad a nivel de fila (RLS) de Supabase.</td></tr>
+      <tr><td><b>Tablas</b></td><td>alertas, reportes_incendio, novedades_guardabosque, posiciones_guardabosque, perfiles.</td></tr>
+    </tbody></table>
+
+    <h2 id="glosario"><span class="nro">13</span>Glosario</h2>
     <table><tbody>
       <tr><td><b>Punto de calor</b></td><td>Píxel en el que un sensor satelital registra una temperatura anómalamente alta respecto a su entorno.</td></tr>
       <tr><td><b>FRP</b></td><td>Potencia radiativa del fuego (MW); aproxima la intensidad de la combustión.</td></tr>
@@ -240,12 +257,12 @@
       <tr><td><b>EEP</b></td><td>Estructura Ecológica Principal: conjunto de áreas que sostienen los procesos ecológicos esenciales del territorio.</td></tr>
     </tbody></table>
 
-    <h2 id="citar"><span class="nro">13</span>Cómo citar y créditos</h2>
-    <div class="caja">Gobernación de Caldas – Secretaría de Medio Ambiente y Fundación para la Conservación de la Vida Silvestre en Colombia (FCV). (2026). <i>Vigía Fuego Caldas: Sistema de Alerta Temprana de Incendios y Deforestación del departamento de Caldas</i>. Versión 1.0.</div>
+    <h2 id="citar"><span class="nro">14</span>Cómo citar y créditos</h2>
+    <div class="caja">Gobernación de Caldas – Secretaría de Medio Ambiente y Fundación para la Conservación de la Vida Silvestre en Colombia (FCV). (2026). <i>Vigías del Fuego: Sistema de Alerta Temprana de Incendios y Deforestación del departamento de Caldas</i>. Versión 1.0.</div>
     <p>Datos de: NASA FIRMS; IDEAM; Global Forest Watch y Universidad de Maryland; Hansen et al. (2013) <i>Science</i> 342: 850-853; MapBiomas Colombia; Corpocaldas; Agencia Nacional de Tierras; OpenStreetMap; Open-Meteo y Copernicus Climate Change Service (ERA5).</p>
     <div class="creditos"><img src="app/img/logo-gobernacion.png" alt="Gobierno de Caldas · Secretaría de Medio Ambiente"><img src="app/img/logo-fcv.png" alt="Fundación para la Conservación de la Vida Silvestre en Colombia"></div>
   </article>
 </div>
-<footer class="pie-doc">Vigía Fuego Caldas · Gobernación de Caldas – Secretaría de Medio Ambiente · Fundación para la Conservación de la Vida Silvestre en Colombia</footer>
+<footer class="pie-doc">Vigías del Fuego · Gobernación de Caldas – Secretaría de Medio Ambiente · Fundación para la Conservación de la Vida Silvestre en Colombia</footer>
 </body>
 </html>

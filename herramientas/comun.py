@@ -1,4 +1,4 @@
-"""Utilidades compartidas del sistema Vigía Fuego Caldas.
+"""Utilidades compartidas del sistema Vigías del Fuego.
 Todo es gratis y sin Google Earth Engine: servicios ArcGIS públicos, Open-Meteo, GBIF y teselas de GFW."""
 import json, os, ssl, time, urllib.parse, urllib.request
 from shapely.geometry import shape, Point, mapping

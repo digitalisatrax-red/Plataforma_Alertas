@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reporte · Vigías del Fuego</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ── Variables ───────────────────────────── */
+:root {
+  --bg: #0d1117; --surface: #161b22; --surface-2: #1c2333; --surface-3: #21293a;
+  --ink: #e6edf3; --ink-2: #8b949e; --ink-3: #6e7681;
+  --line: rgba(255,255,255,.08); --line-strong: rgba(255,255,255,.16);
+  --brand: #3fb950; --brand-dim: #238636; --vigilar: #f85149; --atencion: #d29922;
+  --bar-1: #3fb950; --bar-2: #d29922; --bar-3: #f85149; --bar-4: #58a6ff; --bar-5: #bc8cff;
+  --radius: 10px; --font: 'Inter', system-ui, sans-serif;
+}
+[data-theme="light"] {
+  --bg: #ffffff; --surface: #f6f8fa; --surface-2: #eef1f4; --surface-3: #d8dee4;
+  --ink: #1f2328; --ink-2: #57606a; --ink-3: #8b949e;
+  --line: rgba(0,0,0,.08); --line-strong: rgba(0,0,0,.16);
+  --brand: #0b6e4f; --brand-dim: #0b6e4f; --vigilar: #c62828; --atencion: #ef6c00;
+  --bar-1: #0b6e4f; --bar-2: #ef6c00; --bar-3: #c62828; --bar-4: #1565c0; --bar-5: #7b1fa2;
+}
+/* ── Reset ───────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body { font-family: var(--font); background: var(--bg); color: var(--ink); line-height: 1.5; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+img { max-width: 100%; display: block; }
+/* ── Página ──────────────────────────────── */
+.pagina { width: 210mm; min-height: 295mm; margin: 0 auto; padding: 14mm 16mm; position: relative; page-break-after: always; overflow: hidden; }
+.pagina:last-child { page-break-after: auto; }
+/* ── Encabezado ──────────────────────────── */
+.enc { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
+.enc img { height: 32px; width: auto; }
+.enc .marca { font-weight: 700; font-size: 13px; letter-spacing: .04em; color: var(--brand); }
+.enc .sep { flex: 1; height: 1px; background: var(--line-strong); }
+.enc .fecha-gen { font-size: 11px; color: var(--ink-3); white-space: nowrap; }
+.titulo-rep { font-size: 32px; font-weight: 900; letter-spacing: -.02em; line-height: 1.15; margin: 10px 0 4px; }
+.sub-rep { font-size: 15px; color: var(--ink-2); margin-bottom: 18px; }
+.sub-rep b { color: var(--ink); font-weight: 600; }
+/* ── KPIs ────────────────────────────────── */
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-bottom: 20px; }
+.kpi-r { background: var(--surface); border-radius: var(--radius); padding: 14px 16px; text-align: center; }
+.kpi-r .v { font-size: 28px; font-weight: 800; line-height: 1.1; }
+.kpi-r .l { font-size: 11px; color: var(--ink-2); margin-top: 4px; line-height: 1.3; }
+.kpi-r.alerta .v { color: var(--vigilar); }
+.kpi-r.aviso .v { color: var(--atencion); }
+.kpi-r.ok .v { color: var(--brand); }
+/* ── Mapa hero ───────────────────────────── */
+.mapa-hero { border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line-strong); margin-bottom: 16px; background: var(--surface); }
+.mapa-hero img { width: 100%; height: auto; display: block; }
+.mapa-hero .pie-mapa { display: flex; align-items: center; gap: 16px; padding: 8px 14px; font-size: 11px; color: var(--ink-3); }
+.mapa-hero .pie-mapa .ley { display: flex; align-items: center; gap: 4px; }
+.mapa-hero .pie-mapa .ley i { width: 10px; height: 10px; border-radius: 3px; }
+/* ── Secciones ───────────────────────────── */
+.sec-titulo { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--brand); margin: 24px 0 10px; padding-bottom: 6px; border-bottom: 2px solid var(--brand-dim); display: flex; align-items: center; gap: 8px; }
+.sec-titulo svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.sec-nota { font-size: 12px; color: var(--ink-3); margin-bottom: 10px; }
+/* ── Tabla ranking ───────────────────────── */
+.ranking { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.ranking th { text-align: left; font-weight: 600; color: var(--ink-3); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; padding: 6px 8px; border-bottom: 1px solid var(--line-strong); }
+.ranking td { padding: 5px 8px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.ranking tr:last-child td { border-bottom: none; }
+.ranking .n { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.ranking .barra-wrap { width: 100%; }
+.barra-bg { height: 8px; background: var(--surface-2); border-radius: 4px; overflow: hidden; }
+.barra-fg { height: 100%; border-radius: 4px; transition: width .4s; }
+/* ── Gráficos (canvas) ───────────────────── */
+.grafico-wrap { background: var(--surface); border-radius: var(--radius); padding: 14px 16px 10px; margin-bottom: 14px; }
+.grafico-wrap h3 { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+.grafico-wrap .ley-g { display: flex; gap: 14px; font-size: 11px; color: var(--ink-2); margin-bottom: 8px; }
+.grafico-wrap .ley-g i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; vertical-align: -1px; margin-right: 3px; }
+.grafico-wrap canvas { width: 100%; display: block; }
+.duo { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+/* ── Campo resumen ───────────────────────── */
+.campo-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.campo-card { background: var(--surface); border-radius: var(--radius); padding: 12px; text-align: center; }
+.campo-card .v { font-size: 24px; font-weight: 800; }
+.campo-card .l { font-size: 11px; color: var(--ink-2); }
+/* ── Clima resumen ───────────────────────── */
+.clima-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+.clima-var { background: var(--surface); border-radius: var(--radius); padding: 14px; }
+.clima-var .nombre { font-size: 12px; color: var(--ink-2); margin-bottom: 4px; }
+.clima-var .valor { font-size: 22px; font-weight: 800; }
+/* ── Cierre ──────────────────────────────── */
+.fuentes-rep { margin-top: 24px; padding-top: 14px; border-top: 1px solid var(--line-strong); }
+.fuentes-rep h4 { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); margin-bottom: 6px; }
+.fuentes-rep p { font-size: 11px; color: var(--ink-3); line-height: 1.6; }
+.pie-logos { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--line); }
+.pie-logos img { height: 28px; width: auto; }
+.pie-logos .credito { font-size: 10px; color: var(--ink-3); text-align: right; }
+/* ── Botonera (solo pantalla) ────────────── */
+.barra-acciones { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface-2); border-top: 1px solid var(--line-strong); padding: 10px 20px; display: flex; justify-content: center; gap: 12px; z-index: 100; backdrop-filter: blur(12px); }
+.barra-acciones button { font: 600 14px/1 var(--font); padding: 10px 24px; border-radius: 8px; border: 1.5px solid var(--line-strong); background: var(--surface); color: var(--ink); cursor: pointer; transition: .15s; }
+.barra-acciones button:hover { background: var(--surface-3); }
+.barra-acciones .pri { background: var(--brand); color: #fff; border-color: var(--brand); }
+.barra-acciones .pri:hover { opacity: .9; }
+/* ── Print ───────────────────────────────── */
+@media print {
+  body { background: var(--bg) !important; }
+  .barra-acciones { display: none !important; }
+  .pagina { margin: 0; padding: 10mm 12mm; width: auto; min-height: auto; }
+  @page { size: A4 portrait; margin: 0; }
+}
+/* ── Responsive preview ──────────────────── */
+@media screen and (max-width: 800px) {
+  .pagina { width: auto; min-height: auto; padding: 16px; }
+  .duo { grid-template-columns: 1fr; }
+  .kpis { grid-template-columns: repeat(3, 1fr); }
+  .campo-grid { grid-template-columns: repeat(2, 1fr); }
+  .clima-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.vacio { text-align: center; padding: 60px 20px; color: var(--ink-3); font-size: 16px; }
+.vacio a { color: var(--brand); }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<div class="barra-acciones" id="acciones" style="display:none">
+  <button onclick="window.print();" class="pri">Guardar como PDF</button>
+  <button onclick="cambiarTema()">Cambiar a tema claro</button>
+  <button onclick="window.close();">Cerrar</button>
+</div>
+
+<script>
+(function () {
+'use strict';
+var R;
+try { R = JSON.parse(localStorage.getItem('vf_reporte')); } catch (e) {}
+if (!R || !R.titulo) { document.getElementById('app').innerHTML = '<div class="vacio"><p>No hay datos de reporte.</p><p>Genere el reporte desde <a href="index.html#entrar=1">Vigías del Fuego</a>.</p></div>'; return; }
+
+document.title = R.titulo + ' · Vigías del Fuego';
+if (R.tema === 'light') document.documentElement.dataset.theme = 'light';
+document.getElementById('acciones').style.display = '';
+
+var app = document.getElementById('app');
+var html = '';
+
+/* ── Helpers ─────────────────────────────── */
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function fmt(n, d) { if (n == null) return '–'; d = d || 0; return Number(n).toLocaleString('es-CO', { minimumFractionDigits: d, maximumFractionDigits: d }); }
+function fechaCorta(ts) { if (!ts) return '–'; var d = new Date(ts); return d.toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' }); }
+
+/* ── Página 1: Portada ───────────────────── */
+html += '<div class="pagina">';
+html += '<div class="enc">';
+html += '<img src="app/img/logo-gobernacion.png" alt="Gobernación de Caldas">';
+html += '<img src="app/img/logo-fcv.png" alt="FCV">';
+html += '<span class="marca">VIGÍAS DEL FUEGO</span>';
+html += '<span class="sep"></span>';
+html += '<span class="fecha-gen">Generado ' + fechaCorta(R.generado) + '</span>';
+html += '</div>';
+html += '<h1 class="titulo-rep">' + esc(R.titulo) + '</h1>';
+html += '<p class="sub-rep">' + esc(R.subtitulo) + '</p>';
+
+/* KPIs */
+if (R.kpi && R.sec.indexOf('resumen') >= 0) {
+  var k = R.kpi;
+  html += '<div class="kpis">';
+  if (k.vigilar != null) html += '<div class="kpi-r alerta"><div class="v">' + k.vigilar + '</div><div class="l">veredas para<br>vigilar de cerca</div></div>';
+  if (k.atencion != null) html += '<div class="kpi-r aviso"><div class="v">' + k.atencion + '</div><div class="l">veredas en<br>atención</div></div>';
+  if (k.calor_30d != null) html += '<div class="kpi-r alerta"><div class="v">' + fmt(k.calor_30d) + '</div><div class="l">puntos de calor<br>en 30 días</div></div>';
+  if (k.defo_4s_ha != null) html += '<div class="kpi-r aviso"><div class="v">' + fmt(k.defo_4s_ha, 1) + '</div><div class="l">ha en alerta de<br>pérdida (4 sem)</div></div>';
+  if (k.anom_temp != null) html += '<div class="kpi-r' + (k.anom_temp > 2 ? ' alerta' : k.anom_temp > 1 ? ' aviso' : '') + '"><div class="v">' + (k.anom_temp > 0 ? '+' : '') + fmt(k.anom_temp, 1) + ' °C</div><div class="l">anomalía temperatura<br>próximos 7 días</div></div>';
+  if (k.alertas != null) html += '<div class="kpi-r' + (k.alertas > 0 ? ' alerta' : ' ok') + '"><div class="v">' + k.alertas + '</div><div class="l">alertas de campo<br>sin atender</div></div>';
+  html += '</div>';
+}
+
+/* Mapa hero */
+if (R.mapa && R.sec.indexOf('mapa') >= 0) {
+  html += '<div class="mapa-hero"><img src="' + R.mapa + '" alt="Mapa de vigilancia · ' + esc(R.territorio) + '">';
+  html += '<div class="pie-mapa"><span>Mapa de vigilancia · ' + esc(R.territorio) + '</span>';
+  html += '<span class="ley"><i style="background:var(--vigilar)"></i>Vigilar de cerca</span>';
+  html += '<span class="ley"><i style="background:var(--atencion)"></i>Atención</span>';
+  html += '<span class="ley"><i style="background:var(--bar-1)"></i>Normal</span>';
+  html += '</div></div>';
+}
+
+/* Fuentes (si es reporte de una sola página) */
+var totalSec = ['vigilancia','incendios','deforestacion','clima','campo'].filter(function (s) { return R.sec.indexOf(s) >= 0; }).length;
+if (totalSec === 0) {
+  html += fuentes();
+}
+html += '</div>'; // fin pagina 1
+
+/* ── Página 2: Vigilancia ────────────────── */
+if (R.sec.indexOf('vigilancia') >= 0 && R.vig && R.vig.length) {
+  html += '<div class="pagina">';
+  html += encPeq();
+  html += secTitulo('vigilancia', 'Sitios prioritarios de vigilancia');
+  html += '<p class="sec-nota">Veredas ordenadas por índice de riesgo. Se muestran las ' + Math.min(R.vig.length, 20) + ' primeras de ' + esc(R.territorio) + '.</p>';
+  var maxR = R.vig[0].r || 1;
+  html += '<table class="ranking"><thead><tr><th>#</th><th>Vereda</th><th>Municipio</th><th>Nivel</th><th>Riesgo</th><th style="width:30%">Índice</th></tr></thead><tbody>';
+  R.vig.slice(0, 20).forEach(function (v) {
+    var col = v.n === 'vigilar' ? 'var(--vigilar)' : v.n === 'atencion' ? 'var(--atencion)' : 'var(--bar-1)';
+    html += '<tr><td class="n">' + v.p + '</td><td><b>' + esc(v.v) + '</b></td><td>' + esc(v.m) + '</td><td style="color:' + col + ';font-weight:600">' + esc(v.n === 'vigilar' ? 'Vigilar' : v.n === 'atencion' ? 'Atención' : 'Normal') + '</td><td class="n">' + fmt(v.r, 2) + '</td>';
+    html += '<td class="barra-wrap"><div class="barra-bg"><div class="barra-fg" style="width:' + (v.r / maxR * 100) + '%;background:' + col + '"></div></div></td></tr>';
+  });
+  html += '</tbody></table>';
+
+  /* Razones de las top 5 */
+  if (R.vig.length && R.vig[0].rz) {
+    html += '<div style="margin-top:16px">';
+    html += '<div class="sec-nota" style="font-weight:600;color:var(--ink-2)">Factores de riesgo principales</div>';
+    R.vig.slice(0, 5).forEach(function (v) {
+      if (!v.rz || !v.rz.length) return;
+      html += '<div style="font-size:12px;margin-bottom:4px"><b>' + esc(v.v) + '</b> <span style="color:var(--ink-3)">(' + esc(v.m) + ')</span>: ' + v.rz.map(esc).join(' · ') + '</div>';
+    });
+    html += '</div>';
+  }
+  if (totalSec <= 1) html += fuentes();
+  html += '</div>';
+}
+
+/* ── Página 3: Incendios + Deforestación ─── */
+var hayInc = R.sec.indexOf('incendios') >= 0 && R.inc;
+var hayDefo = R.sec.indexOf('deforestacion') >= 0 && R.defo;
+if (hayInc || hayDefo) {
+  html += '<div class="pagina">';
+  html += encPeq();
+  if (hayInc && hayDefo) {
+    html += '<div class="duo">';
+    html += '<div>' + bloqueIncendios() + '</div>';
+    html += '<div>' + bloqueDeforestacion() + '</div>';
+    html += '</div>';
+  } else if (hayInc) {
+    html += bloqueIncendios();
+  } else {
+    html += bloqueDeforestacion();
+  }
+  if (!R.sec.some(function (s) { return ['clima','campo'].indexOf(s) >= 0; })) html += fuentes();
+  html += '</div>';
+}
+
+/* ── Página 4: Clima ─────────────────────── */
+if (R.sec.indexOf('clima') >= 0 && R.clima) {
+  html += '<div class="pagina">';
+  html += encPeq();
+  html += secTitulo('clima', 'Condiciones climáticas y anomalías');
+  if (R.clima.vars && R.clima.vars.length) {
+    html += '<div class="clima-grid">';
+    R.clima.vars.forEach(function (v) {
+      var alerta = /^\+[3-9]|^\+[1-9]\d/.test(v[1]) ? ' alerta' : /^\+[2]/.test(v[1]) ? ' aviso' : /^[0-6]\d%/.test(v[1]) ? ' aviso' : '';
+      html += '<div class="clima-var"><div class="nombre">' + esc(v[0]) + '</div><div class="valor' + alerta + '">' + esc(v[1]) + '</div></div>';
+    });
+    html += '</div>';
+  }
+  if (R.clima.texto) html += '<p style="font-size:13px;color:var(--ink-2);margin-bottom:14px">' + esc(R.clima.texto) + '</p>';
+
+  /* Gráfico de clima si hay datos */
+  if (R.clima.chart) {
+    html += '<div class="grafico-wrap"><h3>Anomalía de temperatura máxima · pronóstico 16 días</h3>';
+    html += '<div class="ley-g"><i style="background:var(--bar-3)"></i>Calor anómalo <i style="background:var(--bar-4)"></i>Frío anómalo</div>';
+    html += '<canvas id="g-clima" height="160"></canvas></div>';
+  }
+  if (R.sec.indexOf('campo') < 0) html += fuentes();
+  html += '</div>';
+}
+
+/* ── Página 5: Campo ─────────────────────── */
+if (R.sec.indexOf('campo') >= 0 && R.campo) {
+  html += '<div class="pagina">';
+  html += encPeq();
+  html += secTitulo('campo', 'Operación de campo');
+  var c = R.campo;
+  html += '<div class="campo-grid">';
+  html += '<div class="campo-card"><div class="v" style="color:var(--vigilar)">' + (c.nueva || 0) + '</div><div class="l">Alertas nuevas</div></div>';
+  html += '<div class="campo-card"><div class="v" style="color:var(--atencion)">' + ((c.asignada || 0) + (c.en_camino || 0)) + '</div><div class="l">En atención</div></div>';
+  html += '<div class="campo-card"><div class="v" style="color:var(--bar-1)">' + (c.verificada || 0) + '</div><div class="l">Verificadas</div></div>';
+  html += '<div class="campo-card"><div class="v">' + (c.reportes || 0) + '</div><div class="l">Reportes de campo</div></div>';
+  html += '</div>';
+  html += '<div style="margin-top:12px;font-size:13px;color:var(--ink-2)">' + (c.guardas || 0) + ' guardabosques en línea · ' + (c.novedades || 0) + ' novedades registradas en campo</div>';
+  html += fuentes();
+  html += '</div>';
+}
+
+/* Si solo se seleccionó resumen + mapa y nada más, agregar fuentes a la primera página ya se hizo */
+
+app.innerHTML = html;
+
+/* ── Gráficos con canvas ─────────────────── */
+setTimeout(function () {
+  if (hayInc && R.inc.meses) renderBarras('g-inc', R.inc.meses, ['FIRMS', 'IDEAM'], ['var(--bar-3)', 'var(--bar-2)']);
+  if (hayDefo && R.defo.semanas) renderLinea('g-defo', R.defo.semanas);
+  if (R.clima && R.clima.chart) renderClimaBarras('g-clima', R.clima.chart);
+}, 100);
+
+/* ── Funciones de renderizado ────────────── */
+function encPeq() {
+  return '<div class="enc"><img src="app/img/logo-gobernacion.png" alt=""><img src="app/img/logo-fcv.png" alt=""><span class="marca">VIGÍAS DEL FUEGO</span><span class="sep"></span><span class="fecha-gen">' + esc(R.titulo) + ' · ' + fechaCorta(R.generado) + '</span></div>';
+}
+function secTitulo(ic, titulo) {
+  var iconos = {
+    vigilancia: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/>',
+    incendios: '<path d="M12 22c4.4 0 7-3 7-7 0-3-1.6-5.4-3.4-7.3-.4 1.8-1.4 3.1-2.6 3.6.2-3.3-1.3-6.4-4-8.3.3 3.2-1.4 5.3-3 7.2C4.7 11.8 5 13 5 15c0 4 2.6 7 7 7Z"/>',
+    deforestacion: '<path d="M12 2 6 10h3l-4 6h6v6h2v-6h6l-4-6h3Z"/><path d="m3 21 4-4"/>',
+    clima: '<path d="M14 14.8V4a2 2 0 0 0-4 0v10.8a4 4 0 1 0 4 0Z"/><path d="M12 10v7"/>',
+    campo: '<path d="M12 2a3 3 0 0 0-3 3v1h6V5a3 3 0 0 0-3-3Z"/><rect x="7" y="6" width="10" height="16" rx="2"/><path d="M10 11h4M10 15h4"/>'
+  };
+  return '<div class="sec-titulo"><svg viewBox="0 0 24 24">' + (iconos[ic] || '') + '</svg>' + esc(titulo) + '</div>';
+}
+function bloqueIncendios() {
+  var h = secTitulo('incendios', 'Detecciones de puntos de calor');
+  h += '<p class="sec-nota">Puntos de calor detectados por satélite (NASA FIRMS e IDEAM) en ' + esc(R.territorio) + '. Total: <b>' + fmt(R.inc.total) + '</b> en el período.</p>';
+  if (R.inc.meses) {
+    h += '<div class="grafico-wrap"><h3>Detecciones por mes</h3>';
+    h += '<div class="ley-g"><i style="background:var(--bar-3)"></i>FIRMS <i style="background:var(--bar-2)"></i>IDEAM</div>';
+    h += '<canvas id="g-inc" height="180"></canvas></div>';
+  }
+  if (R.inc.top && R.inc.top.length) {
+    h += '<table class="ranking"><thead><tr><th>Vereda</th><th class="n">Puntos</th></tr></thead><tbody>';
+    R.inc.top.slice(0, 10).forEach(function (t) { h += '<tr><td>' + esc(t[0]) + '</td><td class="n"><b>' + t[1] + '</b></td></tr>'; });
+    h += '</tbody></table>';
+  }
+  return h;
+}
+function bloqueDeforestacion() {
+  var h = secTitulo('deforestacion', 'Alertas de pérdida de bosque');
+  h += '<p class="sec-nota">Alertas integradas de pérdida de cobertura arbórea (Global Forest Watch) en ' + esc(R.territorio) + '. Total: <b>' + fmt(R.defo.total_ha, 1) + ' ha</b>.</p>';
+  if (R.defo.semanas) {
+    h += '<div class="grafico-wrap"><h3>Área en alerta por semana</h3>';
+    h += '<div class="ley-g"><i style="background:var(--bar-1)"></i>ha por semana</div>';
+    h += '<canvas id="g-defo" height="180"></canvas></div>';
+  }
+  if (R.defo.top && R.defo.top.length) {
+    h += '<table class="ranking"><thead><tr><th>Vereda</th><th class="n">ha</th></tr></thead><tbody>';
+    R.defo.top.slice(0, 10).forEach(function (t) { h += '<tr><td>' + esc(t[0]) + '</td><td class="n"><b>' + fmt(t[1], 1) + '</b></td></tr>'; });
+    h += '</tbody></table>';
+  }
+  return h;
+}
+function fuentes() {
+  var h = '<div class="fuentes-rep"><h4>Fuentes de información</h4>';
+  h += '<p>' + esc(R.fuentes || 'NASA FIRMS (VIIRS/MODIS), IDEAM, Global Forest Watch, Open-Meteo, Corpocaldas, ANT') + '</p>';
+  h += '<p style="margin-top:4px">Generado por Vigías del Fuego · ' + fechaCorta(R.generado) + '. Índice de priorización v1.0. Ver metodología completa en <i>metodologia.html</i>.</p>';
+  h += '</div>';
+  h += '<div class="pie-logos"><div><img src="app/img/logo-gobernacion.png" alt="" style="height:24px;margin-bottom:4px"><img src="app/img/logo-fcv.png" alt="" style="height:24px"></div>';
+  h += '<div class="credito">Vigías del Fuego · Sistema de Alerta Temprana<br>de Incendios y Deforestación · ' + new Date().getFullYear() + '</div></div>';
+  return h;
+}
+
+/* ── Chart: grouped vertical bars ────────── */
+function renderBarras(id, datos, series, colores) {
+  var el = document.getElementById(id); if (!el) return;
+  var cs = getComputedStyle(document.documentElement);
+  var cols = colores.map(function (c) { return c.startsWith('var(') ? cs.getPropertyValue(c.slice(4, -1)).trim() : c; });
+  var dpr = window.devicePixelRatio || 1;
+  var w = el.parentElement.clientWidth - 32, h = 160;
+  el.width = w * dpr; el.height = h * dpr;
+  el.style.width = w + 'px'; el.style.height = h + 'px';
+  var ctx = el.getContext('2d'); ctx.scale(dpr, dpr);
+  var ink2 = cs.getPropertyValue('--ink-2').trim() || '#8b949e';
+  var line = cs.getPropertyValue('--line').trim() || 'rgba(255,255,255,.08)';
+  var n = datos.length, g = series.length, maxV = 1;
+  datos.forEach(function (d) { for (var i = 1; i <= g; i++) if (d[i] > maxV) maxV = d[i]; });
+  maxV = Math.ceil(maxV * 1.15);
+  var ml = 36, mr = 10, mt = 4, mb = 28, pw = w - ml - mr, ph = h - mt - mb;
+  var bw = Math.min(pw / n * 0.7 / g, 20), gap = 2;
+  // Grid
+  ctx.strokeStyle = line; ctx.lineWidth = 1; ctx.font = '10px Inter,sans-serif'; ctx.fillStyle = ink2; ctx.textAlign = 'right';
+  for (var i = 0; i <= 4; i++) {
+    var y = mt + ph - ph * i / 4, v = Math.round(maxV * i / 4);
+    ctx.beginPath(); ctx.moveTo(ml, y); ctx.lineTo(w - mr, y); ctx.stroke();
+    ctx.fillText(v, ml - 6, y + 3.5);
+  }
+  // Bars
+  datos.forEach(function (d, j) {
+    var cx = ml + (j + 0.5) * pw / n;
+    for (var s = 0; s < g; s++) {
+      var val = d[s + 1] || 0, bh = val / maxV * ph;
+      var x = cx - (g * bw + (g - 1) * gap) / 2 + s * (bw + gap);
+      ctx.fillStyle = cols[s]; ctx.beginPath();
+      var r = Math.min(3, bh / 2);
+      if (bh > 0) { ctx.moveTo(x, mt + ph); ctx.lineTo(x, mt + ph - bh + r); ctx.quadraticCurveTo(x, mt + ph - bh, x + r, mt + ph - bh); ctx.lineTo(x + bw - r, mt + ph - bh); ctx.quadraticCurveTo(x + bw, mt + ph - bh, x + bw, mt + ph - bh + r); ctx.lineTo(x + bw, mt + ph); ctx.fill(); }
+    }
+    // Label
+    ctx.fillStyle = ink2; ctx.textAlign = 'center'; ctx.font = '9.5px Inter,sans-serif';
+    var lbl = String(d[0]).length > 5 ? String(d[0]).slice(0, 3) : d[0];
+    ctx.fillText(lbl, cx, h - mb + 14);
+  });
+}
+
+/* ── Chart: line/area ────────────────────── */
+function renderLinea(id, datos) {
+  var el = document.getElementById(id); if (!el) return;
+  var cs = getComputedStyle(document.documentElement);
+  var col = cs.getPropertyValue('--bar-1').trim() || '#3fb950';
+  var ink2 = cs.getPropertyValue('--ink-2').trim() || '#8b949e';
+  var line = cs.getPropertyValue('--line').trim() || 'rgba(255,255,255,.08)';
+  var dpr = window.devicePixelRatio || 1;
+  var w = el.parentElement.clientWidth - 32, h = 160;
+  el.width = w * dpr; el.height = h * dpr;
+  el.style.width = w + 'px'; el.style.height = h + 'px';
+  var ctx = el.getContext('2d'); ctx.scale(dpr, dpr);
+  var n = datos.length, maxV = 1;
+  datos.forEach(function (d) { if (d[1] > maxV) maxV = d[1]; });
+  maxV = Math.ceil(maxV * 1.15) || 1;
+  var ml = 42, mr = 10, mt = 4, mb = 28, pw = w - ml - mr, ph = h - mt - mb;
+  // Grid
+  ctx.strokeStyle = line; ctx.lineWidth = 1; ctx.font = '10px Inter,sans-serif'; ctx.fillStyle = ink2; ctx.textAlign = 'right';
+  for (var i = 0; i <= 4; i++) {
+    var y = mt + ph - ph * i / 4, v = (maxV * i / 4).toFixed(1);
+    ctx.beginPath(); ctx.moveTo(ml, y); ctx.lineTo(w - mr, y); ctx.stroke();
+    ctx.fillText(v, ml - 6, y + 3.5);
+  }
+  // Area fill
+  ctx.beginPath(); ctx.moveTo(ml, mt + ph);
+  datos.forEach(function (d, j) {
+    var x = ml + j * pw / Math.max(n - 1, 1), y = mt + ph - (d[1] / maxV) * ph;
+    if (j === 0) ctx.lineTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.lineTo(ml + (n - 1) * pw / Math.max(n - 1, 1), mt + ph); ctx.closePath();
+  ctx.fillStyle = col + '20'; ctx.fill();
+  // Line
+  ctx.beginPath();
+  datos.forEach(function (d, j) {
+    var x = ml + j * pw / Math.max(n - 1, 1), y = mt + ph - (d[1] / maxV) * ph;
+    if (j === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.stroke();
+  // Dots
+  datos.forEach(function (d, j) {
+    var x = ml + j * pw / Math.max(n - 1, 1), y = mt + ph - (d[1] / maxV) * ph;
+    ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.fillStyle = col; ctx.fill();
+  });
+  // Labels (every nth)
+  ctx.fillStyle = ink2; ctx.textAlign = 'center'; ctx.font = '9px Inter,sans-serif';
+  var cada = Math.max(1, Math.floor(n / 8));
+  datos.forEach(function (d, j) {
+    if (j % cada !== 0 && j !== n - 1) return;
+    var x = ml + j * pw / Math.max(n - 1, 1);
+    ctx.fillText(d[0], x, h - mb + 14);
+  });
+}
+
+/* ── Chart: clima diverging bars ─────────── */
+function renderClimaBarras(id, datos) {
+  var el = document.getElementById(id); if (!el) return;
+  var cs = getComputedStyle(document.documentElement);
+  var colUp = cs.getPropertyValue('--bar-3').trim() || '#f85149';
+  var colDn = cs.getPropertyValue('--bar-4').trim() || '#58a6ff';
+  var ink2 = cs.getPropertyValue('--ink-2').trim() || '#8b949e';
+  var line = cs.getPropertyValue('--line').trim() || 'rgba(255,255,255,.08)';
+  var dpr = window.devicePixelRatio || 1;
+  var w = el.parentElement.clientWidth - 32, h = 140;
+  el.width = w * dpr; el.height = h * dpr;
+  el.style.width = w + 'px'; el.style.height = h + 'px';
+  var ctx = el.getContext('2d'); ctx.scale(dpr, dpr);
+  var n = datos.length, maxA = 1;
+  datos.forEach(function (d) { if (Math.abs(d[1]) > maxA) maxA = Math.abs(d[1]); });
+  maxA = Math.ceil(maxA * 1.2) || 1;
+  var ml = 36, mr = 10, mt = 4, mb = 24, pw = w - ml - mr, ph = h - mt - mb, mid = mt + ph / 2;
+  // Zero line
+  ctx.strokeStyle = ink2; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+  ctx.beginPath(); ctx.moveTo(ml, mid); ctx.lineTo(w - mr, mid); ctx.stroke(); ctx.setLineDash([]);
+  // Bars
+  var bw = Math.min(pw / n * 0.75, 16);
+  datos.forEach(function (d, j) {
+    var cx = ml + (j + 0.5) * pw / n;
+    var val = d[1], bh = Math.abs(val) / maxA * (ph / 2);
+    var x = cx - bw / 2;
+    ctx.fillStyle = val >= 0 ? colUp : colDn;
+    if (val >= 0) ctx.fillRect(x, mid - bh, bw, bh);
+    else ctx.fillRect(x, mid, bw, bh);
+  });
+  // Labels
+  ctx.fillStyle = ink2; ctx.textAlign = 'center'; ctx.font = '9px Inter,sans-serif';
+  var cada = Math.max(1, Math.floor(n / 10));
+  datos.forEach(function (d, j) {
+    if (j % cada !== 0 && j !== n - 1) return;
+    ctx.fillText(d[0], ml + (j + 0.5) * pw / n, h - mb + 12);
+  });
+  ctx.textAlign = 'right'; ctx.fillText('+' + maxA + '°C', ml - 4, mt + 10);
+  ctx.fillText('−' + maxA + '°C', ml - 4, h - mb - 2);
+}
+
+/* ── Tema toggle ─────────────────────────── */
+window.cambiarTema = function () {
+  var actual = document.documentElement.dataset.theme;
+  if (actual === 'light') { delete document.documentElement.dataset.theme; document.querySelector('.barra-acciones button:nth-child(2)').textContent = 'Cambiar a tema claro'; }
+  else { document.documentElement.dataset.theme = 'light'; document.querySelector('.barra-acciones button:nth-child(2)').textContent = 'Cambiar a tema oscuro'; }
+  // Re-render charts
+  if (hayInc && R.inc.meses) { var c = document.getElementById('g-inc'); if (c) { c.width = 0; renderBarras('g-inc', R.inc.meses, ['FIRMS','IDEAM'], ['var(--bar-3)','var(--bar-2)']); } }
+  if (hayDefo && R.defo.semanas) { var c2 = document.getElementById('g-defo'); if (c2) { c2.width = 0; renderLinea('g-defo', R.defo.semanas); } }
+  if (R.clima && R.clima.chart) { var c3 = document.getElementById('g-clima'); if (c3) { c3.width = 0; renderClimaBarras('g-clima', R.clima.chart); } }
+};
+
+})();
+</script>
+</body>
+</html>

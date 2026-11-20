@@ -1,4 +1,4 @@
-/* Vigía Fuego Caldas · Sistema de Alerta Temprana de Incendios y Deforestación.
+/* Vigías del Fuego · Sistema de Alerta Temprana de Incendios y Deforestación.
    Página estática: lee los JSON que generan los scripts de herramientas/ (GitHub Actions) y servicios públicos en vivo.
    La vista está restringida a Caldas (máscara + límites de navegación). Todas las capas pasan por un registro único
    (REG) que define su color cartográfico, su leyenda, su opacidad y su fuente. */
@@ -17,6 +17,7 @@
     incendios: '<path d="M12 22c4.4 0 7-3 7-7 0-3-1.6-5.4-3.4-7.3-.4 1.8-1.4 3.1-2.6 3.6.2-3.3-1.3-6.4-4-8.3.3 3.2-1.4 5.3-3 7.2C4.7 11.8 5 13 5 15c0 4 2.6 7 7 7Z"/>',
     deforestacion: '<path d="M12 2 6 10h3l-4 6h6v6h2v-6h6l-4-6h3Z"/><path d="m3 21 4-4"/>',
     clima: '<path d="M14 14.8V4a2 2 0 0 0-4 0v10.8a4 4 0 1 0 4 0Z"/><path d="M12 10v7"/>',
+    campo: '<path d="M12 2a3 3 0 0 0-3 3v1h6V5a3 3 0 0 0-3-3Z"/><rect x="7" y="6" width="10" height="16" rx="2"/><path d="M10 11h4M10 15h4"/><path d="M17 9l3-3M17 13h3"/>',
     especies: '<path d="M16 7h.01"/><path d="M3.4 18H12a8 8 0 0 0 8-8V7a4 4 0 0 0-7.3-2.3L2 20"/><path d="m20 7 2 .5-2 .5"/><path d="M10 18v3M14 17.8V21"/>',
     capas: '<path d="m12 2 10 5-10 5L2 7Z"/><path d="m2 17 10 5 10-5M2 12l10 5 10-5"/>',
     info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
@@ -313,7 +314,7 @@
     $('#b-csv-vig').onclick = function () { descargar('sitios_a_vigilar.csv', ['puesto;nivel;vereda;municipio;indice;anomalia_tmax_7d;dias_secos;lluvia_30d_pct;anios_fuego;deforestacion_90d_ha;puntos_calor_30d;paramo;area_protegida;resguardo;razones'].concat(vs.map(function (v) { return [v.puesto, NIVEL[v.nivel], v.ver, v.mun, v.riesgo, v.an_tmax_7f, v.secos, v.lluvia30_pct, v.anios_fuego, v.defo90_ha, v.calor30, v.paramo ? 'sí' : '', v.sinap ? 'sí' : '', v.resguardo ? 'sí' : '', v.razones.join(' | ')].join(';'); }))); };
     var porId = {}; todas.forEach(function (v) { porId[v.id] = v; });
     var col = { vigilar: '#c62828', atencion: '#ef6c00', normal: '#2e7d32' };
-    tematica('vig', { n: 'Veredas por nivel de vigilancia', tipo: 'clases', f: 'Índice de priorización Vigía Fuego v1.0 (ver Metodología)', leyenda: clasesHTML([['#c62828', 'Vigilar de cerca'], ['#ef6c00', 'Atención']]),
+    tematica('vig', { n: 'Veredas por nivel de vigilancia', tipo: 'clases', f: 'Índice de priorización Vigías del Fuego v1.0 (ver Metodología)', leyenda: clasesHTML([['#c62828', 'Vigilar de cerca'], ['#ef6c00', 'Atención']]),
       capa: L.geoJSON(D.veredas, { pane: 'vigil',
         filter: function (f) { var v = porId[f.properties.id]; return v && (v.nivel !== 'normal' || (F.mun && norm(f.properties.mun) === norm(F.mun))); },
         style: function (f) { var v = porId[f.properties.id] || {}; return { color: col[v.nivel], weight: 1.4, opacity: 1, fillColor: col[v.nivel], fillOpacity: v.nivel === 'normal' ? .06 : .32 }; },
@@ -322,7 +323,9 @@
   function popupVereda(v) {
     return '<h3>' + esc(v.ver) + ' · ' + esc(v.mun) + '</h3><div style="margin-bottom:6px">' + est(v.nivel) + ' <span style="color:var(--ink-3)">puesto ' + v.puesto + '</span></div>' +
       pp('', [['Anomalía Tmax próx. 7 días', v.an_tmax_7f == null ? null : (v.an_tmax_7f > 0 ? '+' : '') + fmt(v.an_tmax_7f, 1) + ' °C'], ['Días seguidos sin lluvia', fmt(v.secos)], ['Lluvia 30 días vs. normal', fmt(v.lluvia30_pct) + ' %'],
-        ['Años con fuego (2000-2025)', v.anios_fuego], ['Deforestación 90 días', fmt(v.defo90_ha, 1) + ' ha'], ['Puntos de calor 30 días', v.calor30], ['Vía principal más cercana', fmt(v.km_via, 1) + ' km'], ['Centro poblado más cercano', fmt(v.km_centro_poblado, 1) + ' km']]).replace('<h3></h3>', '');
+        ['Años con fuego (2000-2025)', v.anios_fuego], ['Deforestación 90 días', fmt(v.defo90_ha, 1) + ' ha'], ['Puntos de calor 30 días', v.calor30], ['Vía principal más cercana', fmt(v.km_via, 1) + ' km'], ['Centro poblado más cercano', fmt(v.km_centro_poblado, 1) + ' km']]).replace('<h3></h3>', '') +
+      (function () { var iv = idxVer.find(function (x) { return String(x.p.id) === String(v.id); }); if (!iv) return ''; var b = L.geoJSON({ type: 'Polygon', coordinates: iv.polys[0] }).getBounds().getCenter(); var pt = vereda(b.lng, b.lat) ? b : { lat: (iv.bb[1] + iv.bb[3]) / 2, lng: (iv.bb[0] + iv.bb[2]) / 2 };
+        return botonAlerta({ lat: pt.lat, lon: pt.lng, prioridad: v.nivel === 'vigilar' ? 'alta' : 'media', fuente: 'vigia_fuego', titulo: 'Vigilancia preventiva · ' + v.ver + ' (' + v.mun + ')', descripcion: 'Vereda priorizada por Vigías del Fuego (' + NIVEL[v.nivel] + ', puesto ' + v.puesto + '). ' + v.razones.join('; ') + '.' }); })();
   }
 
   /* 2. Incendios */
@@ -371,7 +374,8 @@
         var edad = (ahora - d.t) / 864e5, c = edad <= 1 ? '#d50000' : edad <= 7 ? '#ff6d00' : edad <= 30 ? '#ffab00' : '#ffd54f';
         if (edad <= 1) L.marker([d.lat, d.lon], { pane: 'puntos', interactive: false, icon: L.divIcon({ className: '', html: '<div class="pulso-fuego" style="width:34px;height:34px"></div>', iconSize: [34, 34] }) }).addTo(g);
         L.circleMarker([d.lat, d.lon], { pane: 'puntos', radius: edad <= 7 ? 6 : 4.5, color: '#ffffff', weight: 1.5, fillColor: c, fillOpacity: 1 })
-          .bindPopup(pp('Punto de calor', [['Fecha', fecha(d.t)], ['Hace', hace(d.t)], ['Fuente', d.s], ['Vereda', d.ver], ['Municipio', d.mun], ['Potencia radiativa', d.frp ? d.frp + ' MW' : null], ['Confianza', d.c]])).addTo(g);
+          .bindPopup(pp('Punto de calor', [['Fecha', fecha(d.t)], ['Hace', hace(d.t)], ['Fuente', d.s], ['Vereda', d.ver], ['Municipio', d.mun], ['Potencia radiativa', d.frp ? d.frp + ' MW' : null], ['Confianza', d.c]]) +
+            botonAlerta({ lat: d.lat, lon: d.lon, prioridad: edad <= 2 ? 'alta' : 'media', fuente: d.f === 'FIRMS' ? 'firms' : 'ideam', fuenteAlterna: d.f === 'FIRMS' ? 'firms' : 'ideam', referencia: 'vf-calor-' + d.f + '-' + d.t + '-' + d.lat + '-' + d.lon, titulo: 'Verificar punto de calor · ' + d.ver + ' (' + d.mun + ')', descripcion: 'Punto de calor ' + d.s + ' detectado el ' + fecha(d.t) + (d.frp ? ', potencia radiativa ' + d.frp + ' MW' : '') + '. Verificar en campo si corresponde a un incendio.' })).addTo(g);
       });
       tematica('fpts', { n: 'Puntos de calor (' + etiqueta + ')', tipo: 'clases', f: 'NASA FIRMS (VIIRS / MODIS) e IDEAM', leyenda: clasesHTML([['#d50000', '≤ 24 h'], ['#ff6d00', '≤ 7 días'], ['#ffab00', '≤ 30 días'], ['#ffd54f', '> 30 días']]), capa: g });
     } else tematica('fpts', null);
@@ -560,6 +564,698 @@
   }
   function sincCatalogo() { $$('label.capa[data-cat]').forEach(function (l) { var r = REG[l.dataset.cat]; l.classList.toggle('on', !!r.on); var i = l.querySelector('input'); if (i) i.checked = !!r.on; }); }
 
+  /* 7. Campo · tablero completo de operación de campo (Supabase) ──────── */
+  var CC = window.VF_CONFIG || {}, CT = CC.tablas || {};
+  var C = {
+    sb: null, ses: null, roles: [], nombre: '', al: [], rep: [], nov: [], pos: [], msg: [], perf: [],
+    tab: 'resumen', filtro: 'activas', borrador: null, esperandoPunto: false, cargado: false, canal: null, err: '',
+    per: 30, d1: '', d2: '', sort: { k: 'fecha', d: -1 }, sel: { r: {}, a: {}, m: {} },
+    seen: {}, sound: false, feed: [], prev: null, alarmTO: null, chatCanal: 'general'
+  };
+  var EST_AL = { nueva: ['Nueva', '#c62828'], asignada: ['Asignada', '#ef6c00'], en_camino: ['En camino', '#1565c0'], verificada: ['Verificada', '#2e7d32'], descartada: ['Descartada', '#78909c'] };
+  var PRIO = { alta: '#c62828', media: '#ef6c00', baja: '#f9a825' };
+  var COL_C = { activo: '#e15759', controlado: '#f28e2b', extinguido: '#59a14f', nueva: '#e15759', asignada: '#f28e2b', en_camino: '#4e79a7', verificada: '#59a14f', descartada: '#9ca3af', validado: '#59a14f', pendiente: '#f28e2b', rechazado: '#9ca3af', alta: '#e15759', media: '#f28e2b', baja: '#59a14f', sos: '#e15759' };
+  var PAL_C = ['#4e79a7', '#f28e2b', '#e15759', '#76b7b2', '#59a14f', '#edc948', '#b07aa1', '#ff9da7', '#9c755f', '#bab0ac'];
+  function sbCliente() {
+    if (C.sb || !window.supabase || !CC.supabaseUrl) return C.sb;
+    C.sb = window.supabase.createClient(CC.supabaseUrl, CC.supabaseKey, { auth: { persistSession: true, autoRefreshToken: true } });
+    C.sb.auth.onAuthStateChange(function (ev, ses) { var antes = !!C.ses; C.ses = ses; if (!!ses !== antes) { cargarCampo(); } });
+    return C.sb;
+  }
+  function puedeCoordinar() { return C.roles.some(function (r) { return r === 'coordinador' || r === 'planeacion'; }); }
+  function esTecnico() { return C.roles.some(function (r) { return r === 'tecnico' || r === 'coordinador' || r === 'planeacion'; }); }
+  async function iniciarCampo() {
+    var sb = sbCliente(); if (!sb) return;
+    var r = await sb.auth.getSession(); C.ses = r.data && r.data.session;
+    await cargarCampo();
+  }
+  async function cargarCampo() {
+    var sb = C.sb; if (!sb) return; C.err = '';
+    try {
+      if (C.ses) {
+        var pf = await sb.from(CT.perfiles).select('rol,nombre').eq('user_id', C.ses.user.id);
+        C.roles = (pf.data || []).map(function (x) { return x.rol; }); C.nombre = (pf.data && pf.data[0] && pf.data[0].nombre) || C.ses.user.email;
+      } else { C.roles = []; C.nombre = ''; }
+      var desde = new Date(Date.now() - 365 * 864e5).toISOString();
+      var q = await Promise.all([
+        sb.from(CT.alertas).select('*').gte('created_at', desde).order('created_at', { ascending: false }).limit(1000),
+        sb.from(CT.reportes).select('*').gte('fecha_hora', desde).order('fecha_hora', { ascending: false }).limit(1000),
+        sb.from(CT.novedades).select('*').gte('created_at', desde).order('created_at', { ascending: false }).limit(500),
+        sb.from(CT.posiciones).select('*').order('updated_at', { ascending: false }).limit(200),
+        sb.from('mensajes').select('*').order('created_at', { ascending: false }).limit(1500),
+        sb.from(CT.perfiles).select('*').limit(300)
+      ]);
+      C.al = q[0].data || []; C.rep = q[1].data || []; C.nov = q[2].data || []; C.pos = q[3].data || [];
+      C.msg = (q[4].data || []).reverse(); C.perf = q[5].data || [];
+      [C.al, C.rep, C.nov].forEach(function (lista) { lista.forEach(function (x) { if (x.lat != null && x.lon != null) { var v = vereda(+x.lon, +x.lat); x._vid = v ? v.id : null; x._ver = v ? v.ver : x.vereda; x._mun = v ? v.mun : x.municipio; } }); });
+      if (q.some(function (r) { return r.error; })) C.err = (q.filter(function (r) { return r.error; })[0].error.message || '');
+      C.cargado = true;
+      suscribir();
+      detectarCampo();
+    } catch (e) { C.err = e.message; }
+    if (map) { pintarRail(); if (E.mod === 'campo') pintar(); }
+  }
+  function suscribir() {
+    if (!C.sb || C.canal) return;
+    var t = null, rec = function () { clearTimeout(t); t = setTimeout(cargarCampo, 800); };
+    C.canal = C.sb.channel('vigia-fuego');
+    [CT.alertas, CT.reportes, CT.novedades, CT.posiciones, 'mensajes'].forEach(function (tb) { C.canal.on('postgres_changes', { event: '*', schema: 'public', table: tb }, rec); });
+    C.canal.subscribe();
+  }
+  function alertasActivas() { return C.al.filter(function (a) { return a.estado === 'nueva' || a.estado === 'asignada' || a.estado === 'en_camino'; }); }
+  function enTerritorio(x) { if (!F.mun && !F.ver) return true; return x._vid != null ? pasa(x._mun, x._vid) : (F.mun && norm(x.municipio) === norm(F.mun) && !F.ver); }
+  function chipEstado(e) { var d = EST_AL[e] || [e || '–', '#78909c']; return '<span class="estado" style="background:' + d[1] + '1a;color:' + d[1] + '">' + esc(d[0]) + '</span>'; }
+  function tagC(c, t) { return '<span class="campo-tag" style="--tc:' + (COL_C[String(c).toLowerCase()] || '#6b7280') + '">' + esc(t || c || '') + '</span>'; }
+
+  /* ── filtros de campo ── */
+  function campoDias() { return C.per === 'rango' ? Math.max(1, Math.round(((C.d2 ? new Date(C.d2 + 'T23:59:59').getTime() : Date.now()) - (C.d1 ? new Date(C.d1 + 'T00:00:00').getTime() : Date.now() - 30 * 864e5)) / 864e5)) : (+C.per || 0); }
+  function campoDesde(k) { k = k || 0; if (C.per === 'rango') { var i = C.d1 ? new Date(C.d1 + 'T00:00:00').getTime() : Date.now() - 30 * 864e5, f = C.d2 ? new Date(C.d2 + 'T23:59:59').getTime() : Date.now(); return i - k * (f - i); } var d = campoDias(); return d ? Date.now() - (k + 1) * d * 864e5 : 0; }
+  function campoHasta(k) { k = k || 0; if (C.per === 'rango') { var i = C.d1 ? new Date(C.d1 + 'T00:00:00').getTime() : Date.now() - 30 * 864e5, f = C.d2 ? new Date(C.d2 + 'T23:59:59').getTime() : Date.now(); return f - k * (f - i); } return k ? Date.now() - k * campoDias() * 864e5 : Infinity; }
+  function enPeriodo(d, k) { var t = new Date(d).getTime(); return t >= campoDesde(k) && t <= campoHasta(k); }
+  function perTexto() { return C.per === 'rango' ? (C.d1 || 'inicio') + ' a ' + (C.d2 || 'hoy') : campoDias() ? 'últimos ' + campoDias() + ' días' : 'todo el período'; }
+  function repNorm(r) { return { id: r.id, fecha: r.fecha_hora, lat: r.lat, lon: r.lon, municipio: r._mun || r.municipio, vereda: r._ver || r.vereda, cobertura: r.cobertura, area: r.area_ha, estado: String(r.estado || '').toLowerCase(), val: r.rechazado ? 'rechazado' : r.validado ? 'validado' : 'pendiente', por: r.reportante, causa: r.causa_probable, obs: r.observaciones, origen: r.origen || 'app', fotos: Array.isArray(r.fotos) ? r.fotos : [], nivel: r.nivel, raw: r }; }
+  function fRepC(k) { return C.rep.filter(function (r) { var n = repNorm(r); return n.val !== 'rechazado' && enTerritorio(r) && enPeriodo(r.fecha_hora, k); }).map(repNorm); }
+  function fRepAll() { return C.rep.filter(function (r) { return enTerritorio(r) && enPeriodo(r.fecha_hora); }).map(repNorm); }
+  function fAlC() { return C.al.filter(function (a) { return enTerritorio(a) && enPeriodo(a.created_at); }); }
+  function lugarC(r) { return [r.vereda || r._ver, r.municipio || r._mun].filter(Boolean).join(' · ') || 'sin ubicación'; }
+  function agoC(t) { var m = Math.round((Date.now() - new Date(t)) / 60000); return !isFinite(m) ? '' : m < 1 ? 'ahora' : m < 60 ? 'hace ' + m + ' min' : m < 1440 ? 'hace ' + Math.round(m / 60) + ' h' : 'hace ' + Math.round(m / 1440) + ' d'; }
+
+  /* ── gráficas compactas ── */
+  function hbarsC(rows, col) { var mx = Math.max(1, Math.max.apply(null, rows.map(function (x) { return x[1]; }))); return rows.length ? rows.map(function (x, i) { return '<div class="campo-bar"><span title="' + esc(x[0]) + '">' + esc(x[0]) + '</span><i style="width:' + Math.max(3, x[1] / mx * 100) + '%;background:' + (col || PAL_C[i % PAL_C.length]) + '"></i><b>' + x[1] + '</b></div>'; }).join('') : '<p class="nota">Sin datos en el período</p>'; }
+  function donutC(rows) { var tot = rows.reduce(function (s, x) { return s + x[1]; }, 0); if (!tot) return '<p class="nota">Sin datos</p>'; var a = 0; var seg2 = rows.map(function (x) { var p = x[1] / tot * 100, r = x[2] + ' ' + a + '% ' + (a + p) + '%'; a += p; return r; }).join(','); return '<div class="campo-donut"><div class="campo-ring" style="background:conic-gradient(' + seg2 + ')" data-t="' + tot + '"></div><div class="campo-lg">' + rows.map(function (x) { return '<div><i style="background:' + x[2] + '"></i>' + esc(x[0]) + ' <b>' + x[1] + '</b> <span>(' + Math.round(x[1] / tot * 100) + '%)</span></div>'; }).join('') + '</div></div>'; }
+  function lineaC(rep) {
+    var n = Math.min(campoDias() || 90, 180), days = [], fin = C.per === 'rango' && C.d2 ? new Date(C.d2 + 'T23:59:59').getTime() : Date.now();
+    for (var i = n - 1; i >= 0; i--) { var d = new Date(fin - i * 864e5); days.push({ k: d.toISOString().slice(0, 10), v: 0 }); }
+    var ix = {}; days.forEach(function (d, j) { ix[d.k] = j; }); rep.forEach(function (r) { var k = (r.fecha || '').slice(0, 10); if (k in ix) days[ix[k]].v++; });
+    var W = 340, H = 140, pl = 28, pb = 20, pt = 8, mx = Math.max(2, Math.max.apply(null, days.map(function (d) { return d.v; })));
+    var ys = function (v) { return H - pb - v / mx * (H - pb - pt); };
+    var g = ''; for (var j = 0; j <= 3; j++) { var v = Math.round(mx * j / 3), y = ys(v); g += '<line x1="' + pl + '" x2="' + W + '" y1="' + y + '" y2="' + y + '" stroke="#e5e7eb"/><text x="' + (pl - 4) + '" y="' + (y + 4) + '" text-anchor="end" style="font-size:9px">' + v + '</text>'; }
+    var step = Math.ceil(days.length / 6);
+    days.forEach(function (d, j) { if (j % step === 0) g += '<text x="' + (pl + j * ((W - pl - 4) / days.length) + ((W - pl - 4) / days.length) / 2) + '" y="' + (H - 4) + '" text-anchor="middle" style="font-size:9px">' + d.k.slice(8) + '/' + d.k.slice(5, 7) + '</text>'; });
+    var bw = (W - pl - 4) / days.length;
+    var bars = days.map(function (d, j) { return '<rect x="' + (pl + j * bw + 1) + '" y="' + ys(d.v) + '" width="' + Math.max(1, bw - 1) + '" height="' + (H - pb - ys(d.v)) + '" fill="#4e79a7" rx="1"><title>' + d.k + ': ' + d.v + '</title></rect>'; }).join('');
+    return '<svg class="campo-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img">' + g + bars + '</svg>';
+  }
+  function cntBy(arr, f) { var c = {}; arr.forEach(function (x) { var k = f(x) || 'Sin dato'; c[k] = (c[k] || 0) + 1; }); return Object.entries(c).sort(function (a, b) { return b[1] - a[1]; }); }
+  function deltaC(a, b, inv) { if (!campoDias()) return ''; if (!b) return a ? '<em class="campo-up">nuevo</em>' : ''; var p = Math.round((a - b) / b * 100); if (!p) return '<em class="campo-eq">= anterior</em>'; return '<em class="' + ((p > 0) !== !!inv ? 'campo-up' : 'campo-dn') + '">' + (p > 0 ? '▲' : '▼') + ' ' + Math.abs(p) + '%</em>'; }
+
+  /* ── detección y alarma ── */
+  var actxC;
+  function beepC(n, hz) { if (!C.sound) return; n = n || 3; hz = hz || 880; try { actxC = actxC || new (window.AudioContext || window.webkitAudioContext)(); for (var i = 0; i < n; i++) { var o = actxC.createOscillator(), g = actxC.createGain(); o.type = 'square'; o.frequency.value = hz + (i % 2) * 220; g.gain.value = .12; o.connect(g); g.connect(actxC.destination); var t = actxC.currentTime + i * .28; o.start(t); o.stop(t + .2); } } catch (e) {} }
+  function snapshotC() { return { al: new Map(C.al.map(function (a) { return [a.id, a.estado + '|' + (a.asignado_a || '')]; })), rep: new Set(C.rep.map(function (r) { return r.id; })), msg: new Set(C.msg.map(function (m) { return m.id; })), nov: new Set(C.nov.map(function (n) { return n.id; })) }; }
+  function detectarCampo() {
+    var cur = snapshotC(), p = C.prev; C.prev = cur; if (!p || !C.ses) return;
+    var ev = [];
+    C.al.forEach(function (a) {
+      if (!p.al.has(a.id)) { if (a.estado === 'nueva') ev.push({ t: 'ALERTA ENTRANTE', d: (a.titulo || '') + (a.municipio ? ' · ' + a.municipio : ''), go: 'alertas', l: 'red' }); }
+      else if (p.al.get(a.id) !== a.estado + '|' + (a.asignado_a || '')) {
+        if (a.estado === 'en_camino' || a.estado === 'asignada') ev.push({ t: a.estado === 'en_camino' ? 'En camino' : 'Alerta tomada', d: (a.asignado_nombre || '') + ' · ' + (a.titulo || ''), go: 'alertas', l: 'amb' });
+        else if (a.estado === 'verificada') ev.push({ t: 'Alerta verificada', d: a.titulo || '', go: 'alertas', l: 'grn' });
+      }
+    });
+    C.rep.forEach(function (r) { if (!p.rep.has(r.id)) ev.push({ t: 'NUEVO REPORTE', d: lugarC(r), go: 'reportes', l: 'red' }); });
+    C.msg.forEach(function (m) { if (!p.msg.has(m.id) && C.ses && m.autor_id !== C.ses.user.id) ev.push(m.tipo === 'sos' ? { t: 'SOS', d: (m.autor_nombre || '') + ': ' + (m.texto || 'pide ayuda'), go: 'chat', l: 'red' } : { t: 'Mensaje', d: (m.autor_nombre || '') + ': ' + (m.texto || ''), go: 'chat', l: 'blu' }); });
+    C.nov.forEach(function (n) { if (!p.nov.has(n.id)) ev.push({ t: 'Novedad', d: (n.autor_nombre || '') + ' · ' + (n.tipo || ''), go: 'equipo', l: 'blu' }); });
+    if (ev.length) dispararAlarma(ev);
+  }
+  var LV_C = { red: '#e15759', amb: '#f28e2b', blu: '#4e79a7', grn: '#59a14f' };
+  function dispararAlarma(ev) {
+    ev.forEach(function (e) { C.feed.unshift(Object.assign({}, e, { at: Date.now() })); }); C.feed = C.feed.slice(0, 30);
+    var top = ev.find(function (e) { return e.l === 'red'; }) || ev.find(function (e) { return e.l === 'amb'; }) || ev[0];
+    if (top.l === 'red') beepC(4); else if (top.l === 'amb') beepC(2, 660); else if (top.l === 'blu') beepC(1, 600);
+    if (E.mod === 'campo') pintar();
+  }
+
+  /* ── CSV export ── */
+  function csvDownC(rows, name) { var t = rows.map(function (r) { return r.map(function (x) { return '"' + String(x == null ? '' : x).replace(/"/g, '""') + '"'; }).join(','); }).join('\n'); var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + t], { type: 'text/csv' })); a.download = name; a.click(); }
+
+  /* ── borrar con confirmación ── */
+  async function borrarC(tabla, ids) {
+    if (!ids.length) return 0;
+    var r = await C.sb.from(tabla).delete().in('id', ids).select('id');
+    if (r.error) throw r.error;
+    return (r.data || []).length;
+  }
+  function fuerteC(n, que) { return n > 1 ? prompt('Va a eliminar ' + n + ' ' + que + ' de forma definitiva.\nEscriba ELIMINAR para confirmar.') === 'ELIMINAR' : confirm('¿Eliminar ' + que.replace(/s$/, '') + ' de forma definitiva?'); }
+
+  /* Borrador de alerta desde otros módulos */
+  window.__vfAlerta = function (k) { var d = (window.__vfBorradores || {})[k]; if (!d) return; map.closePopup(); C.borrador = d; C.esperandoPunto = false; C.tab = 'nueva'; E.mod = 'campo'; pintarRail(); pintar(); $('#contenido').scrollTop = 0; };
+  function botonAlerta(datos) { window.__vfBorradores = window.__vfBorradores || {}; var k = 'b' + Math.random().toString(36).slice(2, 9); window.__vfBorradores[k] = datos; return '<button class="btn pri chico" style="margin-top:8px;width:100%;justify-content:center" onclick="__vfAlerta(\'' + k + '\')">Enviar alerta a campo</button>'; }
+
+  /* ══════════════════════════════════════════════════════
+     MÓDULO PRINCIPAL: modCampo — tablero completo de campo
+     ══════════════════════════════════════════════════════ */
+  function modCampo(el) {
+    if (!C.sb) sbCliente();
+    if (!C.sb) { el.innerHTML = ayuda('No fue posible cargar la conexión con la operación de campo. Verifique su conexión a internet.'); return; }
+    if (!C.cargado) { el.innerHTML = '<p class="nota">Conectando con la operación de campo…</p>'; iniciarCampo(); return; }
+
+    /* Sesión / login */
+    var cab;
+    if (C.ses) {
+      var sndTxt = C.sound ? '🔔 Sonido' : '🔕 Sonido';
+      cab = '<div class="sesion"><div class="av">' + esc((C.nombre || '?').slice(0, 1).toUpperCase()) + '</div><div style="flex:1;min-width:0"><b>' + esc(C.nombre) + '</b><div class="sub">' + esc(C.ses.user.email) + ' · ' + (C.roles.length ? C.roles.map(function (r) { return r.charAt(0).toUpperCase() + r.slice(1); }).join(', ') : 'sin rol') + '</div></div>' +
+        '<button class="btn chico" id="c-snd" title="Alternar sonido">' + sndTxt + '</button>' +
+        '<button class="btn chico" id="c-salir">Salir</button></div>' +
+        '<div class="campo-live" id="c-live"><i></i><span>' + (C.err ? 'Error: ' + esc(C.err) : 'En vivo · ' + agoC(Date.now())) + '</span></div>';
+    } else {
+      cab = '<form class="login" id="c-login" autocomplete="on"><b>Ingreso del equipo de coordinación</b><p class="nota" style="margin:2px 0 8px">Use la misma cuenta del tablero de campo.</p>' +
+        '<label>Correo<input type="email" id="c-em" autocomplete="username" required></label><label>Contraseña<input type="password" id="c-pw" autocomplete="current-password" required></label>' +
+        '<div class="err" id="c-err"></div><button class="btn pri" type="submit" style="width:100%;justify-content:center">Ingresar</button></form>';
+    }
+
+    /* Filtros */
+    var filtros = '';
+    if (C.ses) {
+      var munSet = {};
+      C.rep.forEach(function (r) { if (r.municipio) munSet[r.municipio] = 1; });
+      C.al.forEach(function (a) { if (a.municipio) munSet[a.municipio] = 1; });
+      var muns = Object.keys(munSet).sort();
+      filtros = '<div class="campo-filtros">' +
+        '<select id="c-fper"><option value="7">7 días</option><option value="30"' + (C.per == 30 ? ' selected' : '') + '>30 días</option><option value="90">90 días</option><option value="365">Año</option><option value="0">Todo</option><option value="rango">Rango…</option></select>' +
+        (C.per === 'rango' ? '<input type="date" id="c-fd1" value="' + esc(C.d1) + '"><input type="date" id="c-fd2" value="' + esc(C.d2) + '">' : '') +
+        '<select id="c-fmun"><option value="">Todo Caldas</option>' + muns.map(function (m) { return '<option' + (F.mun && norm(F.mun) === norm(m) ? ' selected' : '') + '>' + esc(m) + '</option>'; }).join('') + '</select>' +
+        '<span class="campo-cnt" id="c-fcnt"></span></div>';
+    }
+
+    /* Tabs */
+    var tabs = C.ses ? [['resumen', 'Resumen'], ['reportes', 'Reportes'], ['alertas', 'Alertas'], ['chat', 'Chat'], ['equipo', 'Equipo'], ['informe', 'Informe']].concat(puedeCoordinar() ? [['nueva', '＋ Alerta']] : []) : [['reportes', 'Reportes'], ['alertas', 'Alertas'], ['equipo', 'Equipo']];
+    if (!C.ses && ['resumen', 'chat', 'informe', 'nueva'].indexOf(C.tab) >= 0) C.tab = 'reportes';
+
+    /* Alarma */
+    var alarm = '';
+    if (C.feed.length && C.ses) {
+      var top = C.feed[0];
+      alarm = '<div class="campo-alarm" style="--ac:' + (LV_C[top.l] || '#4e79a7') + '" id="c-alarm"><b>' + esc(top.t) + '</b> <span>' + esc(top.d) + '</span><button class="btn chico" id="c-alarm-go">Ver</button><button class="btn chico" id="c-alarm-x">×</button></div>';
+    }
+
+    el.innerHTML = alarm + cab + filtros +
+      '<div class="fila" style="margin-top:8px">' + seg('c-tab', tabs, C.tab) + '</div>' +
+      '<div id="c-cuerpo"></div>' +
+      '<p class="fuente">Sincronizado con la operación de campo. <a href="' + esc(CC.tableroCampo || '#') + '" target="_blank" rel="noopener">Tablero externo</a> · <a href="' + esc(CC.appCampo || '#') + '" target="_blank" rel="noopener">App de guardabosques</a></p>';
+
+    /* Eventos */
+    onSeg('c-tab', function (v) { C.tab = v; if (v !== 'nueva') { C.esperandoPunto = false; map.getContainer().style.cursor = ''; } if (v === 'chat') { C.seen[C.chatCanal] = new Date().toISOString(); } });
+    if (C.ses) {
+      $('#c-salir').onclick = async function () { await C.sb.auth.signOut(); C.ses = null; C.tab = 'resumen'; await cargarCampo(); };
+      $('#c-snd').onclick = function () { C.sound = !C.sound; if (C.sound) beepC(2); pintar(); };
+      var fper = $('#c-fper'); if (fper) fper.onchange = function () { C.per = fper.value === 'rango' ? 'rango' : +fper.value; if (C.per === 'rango' && !C.d2) { var h = new Date(); C.d2 = h.toISOString().slice(0, 10); C.d1 = new Date(Date.now() - 30 * 864e5).toISOString().slice(0, 10); } pintar(); };
+      var fd1 = $('#c-fd1'); if (fd1) fd1.onchange = function () { C.d1 = fd1.value; pintar(); };
+      var fd2 = $('#c-fd2'); if (fd2) fd2.onchange = function () { C.d2 = fd2.value; pintar(); };
+      var cnt = $('#c-fcnt'); if (cnt) cnt.textContent = fRepC().length + ' reportes · ' + fAlC().length + ' alertas';
+    } else {
+      $('#c-login').onsubmit = async function (e) {
+        e.preventDefault(); var b = this.querySelector('button'); b.disabled = true; b.textContent = 'Ingresando…';
+        var r = await C.sb.auth.signInWithPassword({ email: $('#c-em').value.trim(), password: $('#c-pw').value });
+        if (r.error) { $('#c-err').textContent = /invalid/i.test(r.error.message) ? 'Correo o contraseña incorrectos.' : r.error.message; b.disabled = false; b.textContent = 'Ingresar'; return; }
+        C.ses = r.data.session; C.tab = 'resumen'; await cargarCampo();
+      };
+    }
+    if ($('#c-alarm-go')) $('#c-alarm-go').onclick = function () { C.tab = C.feed[0].go; C.feed = []; pintar(); };
+    if ($('#c-alarm-x')) $('#c-alarm-x').onclick = function () { C.feed = []; pintar(); };
+
+    /* Tab body */
+    var cu = $('#c-cuerpo');
+    if (C.tab === 'resumen') cuerpoResumen(cu);
+    else if (C.tab === 'reportes') cuerpoReportes(cu);
+    else if (C.tab === 'alertas') cuerpoAlertas(cu);
+    else if (C.tab === 'chat') cuerpoChat(cu);
+    else if (C.tab === 'equipo') cuerpoEquipo(cu);
+    else if (C.tab === 'informe') cuerpoInforme(cu);
+    else cuerpoNueva(cu);
+    capasCampo();
+  }
+
+  /* ── RESUMEN ── */
+  function cuerpoResumen(cu) {
+    var rep = fRepC(), prev = fRepC(1), al = fAlC();
+    var act = C.rep.filter(function (r) { return String(r.estado || '').toLowerCase() === 'activo' && !(r.rechazado) && enTerritorio(r); }).length;
+    var pen = C.rep.filter(function (r) { return !r.validado && !r.rechazado && enTerritorio(r); }).length;
+    var ha = rep.reduce(function (s, r) { return s + (+r.area || 0); }, 0), haP = prev.reduce(function (s, r) { return s + (+r.area || 0); }, 0);
+    var alAb = alertasActivas().filter(enTerritorio).length;
+    var enLinea = C.pos.filter(function (p) { return Date.now() - new Date(p.updated_at) < 36e5; }).length;
+    var sos = C.msg.filter(function (m) { return m.tipo === 'sos' && Date.now() - new Date(m.created_at) < 864e5; }).length;
+
+    var kpis2 = '<div class="kpis">' +
+      kpi(act, 'incendios activos', act ? 'alerta' : '') +
+      kpi(rep.length, 'reportes · ' + perTexto()) +
+      kpi(pen, 'por validar', pen ? 'aviso' : '') +
+      '</div><div class="kpis">' +
+      kpi(ha.toFixed(1) + ' ha', 'área afectada · ' + deltaC(ha, haP)) +
+      kpi(alAb, 'alertas abiertas', alAb ? 'aviso' : '') +
+      kpi(enLinea, 'equipo en línea (1h)') +
+      '</div>';
+    if (sos) kpis2 += '<div class="kpis">' + kpi(sos, 'SOS en 24 h', 'alerta') + '</div>';
+
+    /* Charts */
+    var estRows = ['activo', 'controlado', 'extinguido'].map(function (k) { return [k, rep.filter(function (r) { return r.estado === k; }).length, COL_C[k]]; }).filter(function (x) { return x[1]; });
+    var munRows = cntBy(rep, function (r) { return r.municipio; }).slice(0, 6);
+    var cobRows = cntBy(rep, function (r) { return r.cobertura; }).slice(0, 6);
+
+    cu.innerHTML = kpis2 +
+      '<div class="sec"><span>Estado de los incendios</span></div>' + donutC(estRows) +
+      '<div class="sec"><span>Actividad en vivo</span></div><div class="campo-feed" id="c-feed">' + (C.feed.length ? C.feed.slice(0, 15).map(function (e) { return '<div><i style="background:' + (LV_C[e.l] || '#4e79a7') + '"></i><div><b>' + esc(e.t) + '</b> <span>' + agoC(e.at) + '</span><br>' + esc(e.d) + '</div></div>'; }).join('') : '<p class="nota">Aquí aparecerá la actividad nueva.</p>') + '</div>' +
+      '<div class="sec"><span>Municipios con más reportes</span></div><div class="campo-hb">' + hbarsC(munRows, '#4e79a7') + '</div>' +
+      '<div class="sec"><span>Reportes por día</span></div>' + lineaC(rep) +
+      '<div class="sec"><span>Cobertura afectada</span></div><div class="campo-hb">' + hbarsC(cobRows) + '</div>';
+  }
+
+  /* ── REPORTES ── */
+  function cuerpoReportes(cu) {
+    var allR = fRepAll();
+    var eF = $('#c-rest') ? $('#c-rest').value : '', vF = $('#c-rval') ? $('#c-rval').value : '', qF = $('#c-rq') ? $('#c-rq').value : '';
+    var rows = allR.filter(function (r) { return (!eF || r.estado === eF) && (!vF || r.val === vF) && (!qF || [r.municipio, r.vereda, r.por, r.cobertura, r.causa].join(' ').toLowerCase().indexOf(qF.toLowerCase()) >= 0); });
+    rows.sort(function (a, b) { var x = a[C.sort.k] || '', y = b[C.sort.k] || ''; return (x > y ? 1 : x < y ? -1 : 0) * C.sort.d; });
+
+    cu.innerHTML = '<div class="campo-bar">' +
+      '<select id="c-rest"><option value="">Todos estados</option><option' + (eF === 'activo' ? ' selected' : '') + '>activo</option><option' + (eF === 'controlado' ? ' selected' : '') + '>controlado</option><option' + (eF === 'extinguido' ? ' selected' : '') + '>extinguido</option></select>' +
+      '<select id="c-rval"><option value="">Toda validación</option><option value="pendiente"' + (vF === 'pendiente' ? ' selected' : '') + '>Por validar</option><option value="validado"' + (vF === 'validado' ? ' selected' : '') + '>Validados</option><option value="rechazado"' + (vF === 'rechazado' ? ' selected' : '') + '>Rechazados</option></select>' +
+      '</div>' +
+      '<input type="search" id="c-rq" placeholder="Buscar municipio, vereda…" style="width:100%;margin-bottom:8px" value="' + esc(qF) + '">' +
+      '<div class="campo-bar"><span class="campo-cnt">' + rows.length + ' reportes</span>' +
+        '<button class="btn chico" id="c-csv">CSV</button>' +
+        (puedeCoordinar() ? '<button class="btn chico" id="c-rdel" style="color:#c62828">Eliminar filtrados</button>' : '') +
+      '</div>' +
+      '<div class="campo-tw"><table class="tabla campo-tabla"><thead><tr>' +
+        '<th data-sk="fecha">Fecha</th><th data-sk="municipio">Lugar</th><th data-sk="area">Área</th><th data-sk="estado">Estado</th><th>Val.</th><th>Fotos</th>' +
+      '</tr></thead><tbody>' +
+      (rows.length ? rows.slice(0, 200).map(function (r) {
+        return '<tr class="campo-fila" data-rid="' + esc(r.id) + '"><td>' + fechaCorta(r.fecha) + '</td><td><b>' + esc(r.municipio || '—') + '</b><div class="sub">' + esc(r.vereda || '') + '</div></td><td>' + (r.area != null ? fmt(r.area, 1) : '') + '</td><td>' + tagC(r.estado, r.estado) + '</td><td>' + tagC(r.val, r.val === 'pendiente' ? 'validar' : r.val) + '</td><td>' + (r.fotos.length ? '📷' + r.fotos.length : '') + '</td></tr>';
+      }).join('') : '<tr><td colspan="6" class="nota" style="padding:16px">Sin reportes</td></tr>') +
+      '</tbody></table></div>';
+
+    /* Eventos */
+    var rest = $('#c-rest'), rval = $('#c-rval'), rq = $('#c-rq');
+    if (rest) rest.onchange = function () { pintar(); };
+    if (rval) rval.onchange = function () { pintar(); };
+    if (rq) rq.oninput = function () { pintar(); };
+    $$('th[data-sk]', cu).forEach(function (th) { th.onclick = function () { C.sort = { k: th.dataset.sk, d: C.sort.k === th.dataset.sk ? -C.sort.d : -1 }; pintar(); }; th.style.cursor = 'pointer'; });
+    $$('.campo-fila', cu).forEach(function (tr) { tr.onclick = function () { abrirDetalle(tr.dataset.rid); }; tr.style.cursor = 'pointer'; });
+    var csvBtn = $('#c-csv'); if (csvBtn) csvBtn.onclick = function () {
+      var hdr = ['fecha', 'municipio', 'vereda', 'cobertura', 'area_ha', 'estado', 'validacion', 'causa', 'reportante', 'origen', 'lat', 'lon'];
+      var data = rows.map(function (r) { return [r.fecha, r.municipio, r.vereda, r.cobertura, r.area, r.estado, r.val, r.causa, r.por, r.origen, r.raw ? r.raw.lat : '', r.raw ? r.raw.lon : '']; });
+      csvDownC([hdr].concat(data), 'reportes_incendios.csv');
+    };
+    var rdel = $('#c-rdel'); if (rdel) rdel.onclick = async function () {
+      var ids = rows.map(function (r) { return r.id; }); if (!ids.length || !fuerteC(ids.length, 'reportes')) return;
+      try { await borrarC(CT.reportes, ids); aviso(ids.length + ' reportes eliminados'); } catch (e) { alert(e.message); }
+      await cargarCampo();
+    };
+  }
+
+  /* ── DETALLE DE REPORTE (modal) ── */
+  function abrirDetalle(id) {
+    var raw = C.rep.find(function (r) { return r.id === id; }); if (!raw) return;
+    var r = repNorm(raw);
+    var ex = $('#c-detalle'); if (ex) ex.remove();
+    var d = document.createElement('div'); d.className = 'campo-modal'; d.id = 'c-detalle';
+    var fotos = r.fotos.length ? '<div class="campo-ph">' + r.fotos.map(function (u) { return '<a href="' + esc(u) + '" target="_blank"><img src="' + esc(u) + '" alt="foto"></a>'; }).join('') + '</div>' : '';
+    var row = function (k, v) { return v ? '<div class="campo-dr"><span>' + k + '</span><b>' + esc(v) + '</b></div>' : ''; };
+    var acciones = '';
+    if (esTecnico()) {
+      acciones = '<div class="campo-bar" style="margin-top:10px">' +
+        (r.val !== 'validado' ? '<button class="btn pri chico" id="cd-val">Validar</button>' : '') +
+        (r.val !== 'rechazado' ? '<button class="btn chico" id="cd-rej" style="color:#c62828">Rechazar</button>' : '') +
+        '<button class="btn chico" id="cd-pend">Por validar</button></div>';
+    }
+    if (puedeCoordinar()) {
+      acciones += '<div class="campo-bar" style="margin-top:6px">' +
+        '<label style="flex:1">Estado <select id="cd-est"><option' + (r.estado === 'activo' ? ' selected' : '') + '>activo</option><option' + (r.estado === 'controlado' ? ' selected' : '') + '>controlado</option><option' + (r.estado === 'extinguido' ? ' selected' : '') + '>extinguido</option></select></label>' +
+        '<button class="btn chico" id="cd-del" style="color:#c62828">Eliminar</button></div>';
+    }
+
+    d.innerHTML = '<div class="campo-detalle"><button class="btn chico" id="cd-x" style="float:right">×</button>' +
+      '<h3>' + esc(lugarC(r)) + '</h3><div>' + tagC(r.estado, r.estado) + ' ' + tagC(r.val, r.val === 'pendiente' ? 'por validar' : r.val) + '</div>' +
+      row('Fecha', fecha(r.fecha) + ' (' + agoC(r.fecha) + ')') +
+      row('Cobertura', r.cobertura) + row('Área', r.area != null ? r.area + ' ha' : null) +
+      row('Causa probable', r.causa) + row('Reportó', r.por) + row('Origen', r.origen) +
+      row('Observaciones', r.obs) +
+      (raw.lat != null ? row('Coordenadas', (+raw.lat).toFixed(5) + ', ' + (+raw.lon).toFixed(5)) : '') +
+      fotos + acciones + '</div>';
+
+    document.body.appendChild(d);
+    d.onclick = function (e) { if (e.target === d) d.remove(); };
+    $('#cd-x').onclick = function () { d.remove(); };
+    if ($('#cd-val')) $('#cd-val').onclick = async function () { await C.sb.from(CT.reportes).update({ validado: true, rechazado: false }).eq('id', id); d.remove(); await cargarCampo(); };
+    if ($('#cd-rej')) $('#cd-rej').onclick = async function () { await C.sb.from(CT.reportes).update({ validado: false, rechazado: true }).eq('id', id); d.remove(); await cargarCampo(); };
+    if ($('#cd-pend')) $('#cd-pend').onclick = async function () { await C.sb.from(CT.reportes).update({ validado: false, rechazado: false }).eq('id', id); d.remove(); await cargarCampo(); };
+    if ($('#cd-est')) $('#cd-est').onchange = async function () { await C.sb.from(CT.reportes).update({ estado: $('#cd-est').value }).eq('id', id); d.remove(); await cargarCampo(); };
+    if ($('#cd-del')) $('#cd-del').onclick = async function () { if (!confirm('¿Eliminar este reporte?')) return; try { await borrarC(CT.reportes, [id]); } catch (e) { alert(e.message); } d.remove(); await cargarCampo(); };
+    if (raw.lat != null) map.flyTo([raw.lat, raw.lon], 14, { duration: .6 });
+  }
+
+  /* ── ALERTAS ── */
+  function cuerpoAlertas(cu) {
+    var todas = fAlC().concat(C.al.filter(function (a) { return alertasActivas().indexOf(a) >= 0 && fAlC().indexOf(a) < 0; }));
+    var filt = C.filtro;
+    var rows = todas.filter(function (a) { return !filt || (filt === 'activas' ? ['nueva', 'asignada', 'en_camino'].indexOf(a.estado) >= 0 : a.estado === filt); }).sort(function (a, b) { return new Date(b.created_at) - new Date(a.created_at); });
+    var staff = C.perf.filter(function (p) { return ['guardabosque', 'tecnico', 'coordinador', 'planeacion'].indexOf(p.rol) >= 0; });
+
+    cu.innerHTML = '<div class="fila">' + seg('c-afil', [['activas', 'Activas'], ['verificada', 'Verificadas'], ['descartada', 'Descartadas'], ['', 'Todas']], filt) + '</div>' +
+      '<div class="campo-bar"><span class="campo-cnt">' + rows.length + ' alertas</span>' +
+        (puedeCoordinar() ? '<button class="btn chico" id="c-arei">Reiniciar abiertas</button><button class="btn chico" id="c-addesc" style="color:#c62828">Eliminar descartadas</button>' : '') +
+      '</div>' +
+      '<div class="campo-tw"><table class="tabla campo-tabla"><thead><tr><th>Fecha</th><th>Alerta</th><th>Prio</th><th>Estado</th><th>Asignada</th><th></th></tr></thead><tbody>' +
+      (rows.length ? rows.slice(0, 150).map(function (a) {
+        var asign = '';
+        if (['nueva', 'asignada', 'en_camino'].indexOf(a.estado) >= 0) {
+          asign = '<select data-aas="' + esc(a.id) + '" style="font-size:12px;max-width:100px"><option value="">Asignar…</option>' + staff.map(function (p) { return '<option value="' + esc(p.user_id) + '|' + esc(p.nombre || p.rol) + '"' + (p.user_id === a.asignado_a ? ' selected' : '') + '>' + esc(p.nombre || p.rol) + '</option>'; }).join('') + '</select>';
+        } else { asign = esc(a.asignado_nombre || '—'); }
+        return '<tr data-all="' + (a.lat || '') + ',' + (a.lon || '') + '"><td style="font-size:11px">' + agoC(a.created_at) + '<div class="sub">' + esc(a.fuente || '') + '</div></td><td><b>' + esc(a.titulo || 'Alerta') + '</b><div class="sub">' + esc(a.municipio || '') + '</div></td><td>' + tagC(a.prioridad || 'media', a.prioridad) + '</td><td>' + chipEstado(a.estado) + '</td><td>' + asign + '</td>' +
+          '<td style="white-space:nowrap">' + (['nueva', 'asignada'].indexOf(a.estado) >= 0 ? '<button class="btn chico" data-adesc="' + esc(a.id) + '" style="color:#c62828;font-size:11px">Descartar</button>' : '') + (puedeCoordinar() && a.estado !== 'nueva' ? ' <button class="btn chico" data-arei="' + esc(a.id) + '" style="font-size:11px">Reiniciar</button>' : '') + (puedeCoordinar() ? ' <button class="btn chico" data-adel="' + esc(a.id) + '" style="color:#c62828;font-size:11px">×</button>' : '') + '</td></tr>';
+      }).join('') : '<tr><td colspan="6" class="nota" style="padding:16px">Sin alertas</td></tr>') +
+      '</tbody></table></div>';
+
+    onSeg('c-afil', function (v) { C.filtro = v; });
+    /* Fly to alert on row click */
+    $$('tr[data-all]', cu).forEach(function (tr) { tr.onclick = function (e) { if (e.target.closest('select') || e.target.closest('button')) return; var ll = tr.dataset.all.split(','); if (ll[0] && isFinite(+ll[0])) map.flyTo([+ll[0], +ll[1]], 14, { duration: .6 }); }; });
+    /* Assignment */
+    $$('select[data-aas]', cu).forEach(function (sel) { sel.onchange = async function () { if (!sel.value) return; var parts = sel.value.split('|'); await C.sb.from(CT.alertas).update({ asignado_a: parts[0], asignado_nombre: parts[1], estado: 'asignada' }).eq('id', sel.dataset.aas); await cargarCampo(); }; });
+    /* Descartar */
+    $$('[data-adesc]', cu).forEach(function (b) { b.onclick = async function () { if (!confirm('¿Descartar esta alerta?')) return; await C.sb.from(CT.alertas).update({ estado: 'descartada' }).eq('id', b.dataset.adesc); await cargarCampo(); }; });
+    /* Reiniciar individual */
+    $$('[data-arei]', cu).forEach(function (b) { b.onclick = async function () { await C.sb.from(CT.alertas).update({ estado: 'nueva', asignado_a: null, asignado_nombre: null }).eq('id', b.dataset.arei); await cargarCampo(); }; });
+    /* Eliminar individual */
+    $$('[data-adel]', cu).forEach(function (b) { b.onclick = async function () { if (!confirm('¿Eliminar esta alerta?')) return; try { await borrarC(CT.alertas, [b.dataset.adel]); } catch (e) { alert(e.message); } await cargarCampo(); }; });
+    /* Batch: reiniciar abiertas */
+    if ($('#c-arei')) $('#c-arei').onclick = async function () { var ab = alertasActivas(); if (!ab.length || !confirm('¿Reiniciar ' + ab.length + ' alertas abiertas?')) return; await C.sb.from(CT.alertas).update({ estado: 'nueva', asignado_a: null, asignado_nombre: null }).in('id', ab.map(function (a) { return a.id; })); await cargarCampo(); };
+    /* Batch: eliminar descartadas */
+    if ($('#c-addesc')) $('#c-addesc').onclick = async function () { var d = C.al.filter(function (a) { return a.estado === 'descartada'; }); if (!d.length) return alert('No hay descartadas'); if (!fuerteC(d.length, 'alertas')) return; try { await borrarC(CT.alertas, d.map(function (a) { return a.id; })); } catch (e) { alert(e.message); } await cargarCampo(); };
+  }
+
+  /* ── CHAT ── */
+  function nombreCanal(c) { if (c === 'general') return 'General del equipo'; if (c.indexOf('inc:') === 0) { var r = C.rep.find(function (y) { return y.id === c.slice(4); }); return r ? 'Incendio · ' + lugarC(r) : 'Incendio (reporte)'; } return c; }
+  function canalesCampo() {
+    var m = new Map(); m.set('general', { n: nombreCanal('general'), last: null, u: 0, sos: 0 });
+    C.msg.forEach(function (x) { var c = x.canal || 'general'; if (!m.has(c)) m.set(c, { n: nombreCanal(c), last: null, u: 0, sos: 0 }); var o = m.get(c); o.last = x; if (x.tipo === 'sos' && Date.now() - new Date(x.created_at) < 864e5) o.sos++; if (C.ses && new Date(x.created_at) > new Date(C.seen[c] || 0) && x.autor_id !== C.ses.user.id) o.u++; });
+    return m;
+  }
+  function cuerpoChat(cu) {
+    if (!C.ses) { cu.innerHTML = '<p class="nota">Inicie sesión para ver el chat del equipo.</p>'; return; }
+    var cs = canalesCampo();
+    var msgs = C.msg.filter(function (m) { return (m.canal || 'general') === C.chatCanal; });
+    cu.innerHTML = '<div class="campo-canales" id="c-chs">' + Array.from(cs).map(function (e) {
+      var k = e[0], v = e[1];
+      return '<div class="campo-ch' + (k === C.chatCanal ? ' on' : '') + '" data-cc="' + esc(k) + '"><b>' + esc(v.n) + '</b>' + (v.sos ? ' ' + tagC('sos', 'SOS') : '') + (v.u && k !== C.chatCanal ? ' <span class="badge">' + v.u + '</span>' : '') + '<div class="sub">' + (v.last ? esc((v.last.autor_nombre || '') + ': ' + (v.last.texto || '').slice(0, 40)) : 'Sin mensajes') + '</div></div>';
+    }).join('') + '</div>' +
+      '<div class="sec"><span>' + esc(nombreCanal(C.chatCanal)) + ' · ' + msgs.length + ' mensajes</span></div>' +
+      '<div class="campo-msgs" id="c-msgs">' + (msgs.length ? msgs.map(function (m) {
+        var me = C.ses && m.autor_id === C.ses.user.id;
+        return '<div class="campo-msg' + (me ? ' me' : '') + (m.tipo === 'sos' ? ' sos' : '') + '">' +
+          (puedeCoordinar() ? '<button class="btn chico" data-cmdel="' + esc(m.id) + '" style="float:right;font-size:10px;color:#c62828" title="Eliminar">×</button>' : '') +
+          '<small><b>' + esc(m.autor_nombre || '—') + '</b> · ' + agoC(m.created_at) + '</small>' +
+          (m.tipo === 'sos' ? ' ' + tagC('sos', 'SOS') : '') +
+          '<div>' + esc(m.texto || '') + '</div>' +
+          (m.lat != null ? '<a href="https://www.google.com/maps?q=' + m.lat + ',' + m.lon + '" target="_blank" style="font-size:11px">📍 ubicación</a>' : '') +
+          '</div>';
+      }).join('') : '<p class="nota">Aún no hay mensajes aquí.</p>') + '</div>' +
+      '<div class="campo-cf"><input type="text" id="c-cin" placeholder="Escribe un mensaje…"><button class="btn pri chico" id="c-csend">Enviar</button></div>';
+
+    /* Events */
+    $$('.campo-ch', cu).forEach(function (d) { d.onclick = function () { C.chatCanal = d.dataset.cc; C.seen[C.chatCanal] = new Date().toISOString(); pintar(); }; });
+    var msgBox = $('#c-msgs'); if (msgBox) msgBox.scrollTop = msgBox.scrollHeight;
+    var sendMsg = async function () {
+      var t = $('#c-cin').value.trim(); if (!t) return; $('#c-cin').value = '';
+      var m = { id: crypto.randomUUID ? crypto.randomUUID() : 'vf-' + Date.now(), canal: C.chatCanal, autor_id: C.ses.user.id, autor_nombre: C.nombre + ' (coordinación)', tipo: 'texto', texto: t, created_at: new Date().toISOString() };
+      C.msg.push(m); pintar();
+      var r = await C.sb.from('mensajes').insert(m);
+      if (r.error) { alert('No se pudo enviar: ' + r.error.message); await cargarCampo(); }
+    };
+    if ($('#c-csend')) $('#c-csend').onclick = sendMsg;
+    if ($('#c-cin')) $('#c-cin').onkeydown = function (e) { if (e.key === 'Enter') sendMsg(); };
+    $$('[data-cmdel]', cu).forEach(function (b) { b.onclick = async function (e) { e.stopPropagation(); if (!confirm('¿Eliminar este mensaje?')) return; try { await borrarC('mensajes', [b.dataset.cmdel]); } catch (e2) { alert(e2.message); } await cargarCampo(); }; });
+    C.seen[C.chatCanal] = new Date().toISOString();
+  }
+
+  /* ── EQUIPO ── */
+  function cuerpoEquipo(cu) {
+    cu.innerHTML = '<div class="sec"><span>Guardabosques · última posición</span></div>' +
+      (C.pos.length ? '<div class="campo-tw"><table class="tabla campo-tabla"><thead><tr><th>Nombre</th><th>Última señal</th><th>Ubicación</th></tr></thead><tbody>' + C.pos.slice().sort(function (a, b) { return new Date(b.updated_at) - new Date(a.updated_at); }).map(function (p) {
+        var on = Date.now() - new Date(p.updated_at) < 2 * 36e5;
+        return '<tr data-ll="' + p.lat + ',' + p.lon + '"><td>' + (on ? '<span class="campo-on">●</span>' : '<span class="campo-off">●</span>') + ' <b>' + esc(p.nombre || 'Guardabosque') + '</b></td><td>' + agoC(p.updated_at) + '</td><td>' + (p.lat != null ? '<a href="https://www.google.com/maps?q=' + p.lat + ',' + p.lon + '" target="_blank" style="font-size:11px">' + (+p.lat).toFixed(4) + ', ' + (+p.lon).toFixed(4) + '</a>' : '—') + '</td></tr>';
+      }).join('') + '</tbody></table></div>' : '<p class="nota">' + (C.ses ? 'No hay posiciones recientes.' : 'Inicie sesión para ver el equipo.') + '</p>') +
+      '<div class="sec"><span>Novedades de ronda</span></div>' +
+      (C.nov.length ? '<div class="campo-tw" style="max-height:400px">' + C.nov.filter(enTerritorio).slice(0, 60).map(function (n) {
+        var fo = (n.fotos || []).slice(0, 3).map(function (u, i) { return '<a href="' + esc(u) + '" target="_blank" style="font-size:11px">foto ' + (i + 1) + '</a>'; }).join(' · ');
+        return '<div style="padding:8px 0;border-bottom:1px solid var(--line)"><b>' + esc(n.tipo || 'Novedad') + '</b> ' + tagC(n.prioridad || 'media', n.prioridad) + '<div class="sub">' + esc(n.autor_nombre || '') + ' · ' + fecha(n.created_at) + (n.lat != null ? ' · <a href="https://www.google.com/maps?q=' + n.lat + ',' + n.lon + '" target="_blank" style="font-size:11px">ubicación</a>' : '') + '</div>' + (n.descripcion ? '<div style="font-size:13px;margin-top:2px">' + esc(n.descripcion) + '</div>' : '') + (fo ? '<small>' + fo + '</small>' : '') + '</div>';
+      }).join('') + '</div>' : '<p class="nota">Sin novedades.</p>');
+    $$('tr[data-ll]', cu).forEach(function (tr) { tr.onclick = function () { var ll = tr.dataset.ll.split(','); if (isFinite(+ll[0])) map.flyTo([+ll[0], +ll[1]], 14, { duration: .6 }); }; tr.style.cursor = 'pointer'; });
+  }
+
+  /* ── INFORME ── */
+  function cuerpoInforme(cu) {
+    if (!C.ses) { cu.innerHTML = '<p class="nota">Inicie sesión para generar informes.</p>'; return; }
+    var rep = fRepC(), al = fAlC();
+    var act = rep.filter(function (r) { return r.estado === 'activo'; }).length;
+    var pen = rep.filter(function (r) { return r.val === 'pendiente'; }).length;
+    var ha = rep.reduce(function (s, r) { return s + (+r.area || 0); }, 0);
+    var alAb = alertasActivas().filter(enTerritorio).length;
+    var estRows = ['activo', 'controlado', 'extinguido'].map(function (k) { return [k, rep.filter(function (r) { return r.estado === k; }).length, COL_C[k]]; }).filter(function (x) { return x[1]; });
+    var munRows = cntBy(rep, function (r) { return r.municipio; }).slice(0, 8);
+    var cobRows = cntBy(rep, function (r) { return r.cobertura; }).slice(0, 8);
+
+    cu.innerHTML = '<div class="campo-bar"><button class="btn pri chico" id="c-prn">Imprimir / PDF</button><button class="btn chico" id="c-csv2">CSV</button><span class="campo-cnt">' + perTexto() + '</span></div>' +
+      '<div class="campo-inf" id="c-inf">' +
+      '<h3>Informe de incendios reportados en campo</h3><div class="sub">Período: ' + esc(perTexto()) + ' · Generado por ' + esc(C.nombre) + ' · ' + fecha(Date.now()) + '</div>' +
+      '<div class="kpis" style="margin:10px 0">' + kpi(rep.length, 'reportes') + kpi(act, 'activos') + kpi(pen, 'por validar') + kpi(ha.toFixed(1) + ' ha', 'área') + kpi(alAb, 'alertas abiertas') + '</div>' +
+      '<div class="sec"><span>Estado</span></div>' + donutC(estRows) +
+      '<div class="sec"><span>Municipios</span></div><div class="campo-hb">' + hbarsC(munRows, '#4e79a7') + '</div>' +
+      '<div class="sec"><span>Cobertura</span></div><div class="campo-hb">' + hbarsC(cobRows) + '</div>' +
+      '<div class="sec"><span>Reportes por día</span></div>' + lineaC(rep) +
+      '<div class="sec"><span>Detalle</span></div>' +
+      '<div class="campo-tw"><table class="tabla campo-tabla"><thead><tr><th>Fecha</th><th>Lugar</th><th>Cobertura</th><th>ha</th><th>Estado</th><th>Val.</th><th>Reportó</th></tr></thead><tbody>' +
+      rep.slice().sort(function (a, b) { return new Date(b.fecha) - new Date(a.fecha); }).map(function (r) {
+        return '<tr><td>' + fechaCorta(r.fecha) + '</td><td>' + esc(lugarC(r)) + '</td><td>' + esc(r.cobertura || '') + '</td><td>' + (r.area != null ? fmt(r.area, 1) : '') + '</td><td>' + esc(r.estado) + '</td><td>' + (r.val === 'pendiente' ? 'validar' : r.val) + '</td><td>' + esc(r.por || '') + '</td></tr>';
+      }).join('') +
+      '</tbody></table></div>' +
+      '<div class="sub" style="margin-top:10px">Fuente: reportes de campo · Gobernación de Caldas. Los reportes rechazados no se incluyen.</div>' +
+      '</div>';
+
+    $('#c-prn').onclick = function () { window.print(); };
+    $('#c-csv2').onclick = function () {
+      var hdr = ['fecha', 'municipio', 'vereda', 'cobertura', 'area_ha', 'estado', 'validacion', 'causa', 'reportante'];
+      var data = rep.map(function (r) { return [r.fecha, r.municipio, r.vereda, r.cobertura, r.area, r.estado, r.val, r.causa, r.por]; });
+      csvDownC([hdr].concat(data), 'informe_incendios.csv');
+    };
+  }
+
+  /* ── NUEVA ALERTA ── */
+  function cuerpoNueva(cu) {
+    var b = C.borrador || (C.borrador = { titulo: '', descripcion: '', prioridad: 'alta', fuente: 'vigia_fuego' });
+    var v = b.lat != null ? vereda(b.lon, b.lat) : null;
+    var guardas = C.pos.map(function (p) { return p; });
+    cu.innerHTML = '<form class="formulario" id="c-form">' +
+      '<div class="ubic ' + (b.lat != null ? 'ok' : '') + '">' + (b.lat != null ? '<b>Ubicación:</b> ' + esc(v ? v.ver + ' · ' + v.mun : fmt(b.lat, 5) + ', ' + fmt(b.lon, 5)) + '<div class="sub">' + fmt(b.lat, 5) + ', ' + fmt(b.lon, 5) + '</div>' : '<b>Ubicación pendiente</b>') +
+        '<button type="button" class="btn chico" id="c-punto">' + (C.esperandoPunto ? 'Haga clic en el mapa…' : b.lat != null ? 'Cambiar en el mapa' : 'Marcar en el mapa') + '</button></div>' +
+      '<label>Título<input id="c-ti" required maxlength="140" value="' + esc(b.titulo) + '" placeholder="Ej.: Verificar punto de calor en vereda…"></label>' +
+      '<label>Prioridad</label>' + seg('c-prio', [['alta', 'Alta'], ['media', 'Media'], ['baja', 'Baja']], b.prioridad) +
+      '<label>Descripción e instrucciones<textarea id="c-de" rows="4" placeholder="Qué verificar, accesos, contactos…">' + esc(b.descripcion) + '</textarea></label>' +
+      '<label>Asignar a (opcional)<select id="c-as"><option value="">Sin asignar · visible para todo el equipo</option>' + guardas.map(function (g) { return '<option value="' + esc(g.user_id) + '"' + (b.asignado_a === g.user_id ? ' selected' : '') + '>' + esc(g.nombre || 'Guardabosque') + '</option>'; }).join('') + '</select></label>' +
+      '<div class="err" id="c-ferr"></div><button class="btn pri" type="submit" style="width:100%;justify-content:center">Enviar alerta a los guardabosques</button>' +
+      '<button class="btn" type="button" id="c-cancelar" style="width:100%;justify-content:center;margin-top:6px">Cancelar</button></form>';
+    var guardar = function () { b.titulo = $('#c-ti').value; b.descripcion = $('#c-de').value; b.asignado_a = $('#c-as').value || null; };
+    $$('#c-prio button').forEach(function (x) { x.onclick = function () { guardar(); b.prioridad = x.dataset.v; pintar(); }; });
+    $('#c-punto').onclick = function () { guardar(); C.esperandoPunto = true; map.getContainer().style.cursor = 'crosshair'; pintar(); };
+    $('#c-cancelar').onclick = function () { C.borrador = null; C.esperandoPunto = false; map.getContainer().style.cursor = ''; C.tab = 'alertas'; pintar(); };
+    $('#c-form').onsubmit = async function (e) {
+      e.preventDefault(); guardar();
+      if (b.lat == null) { $('#c-ferr').textContent = 'Marque la ubicación de la alerta en el mapa.'; return; }
+      var btn = this.querySelector('button[type=submit]'); btn.disabled = true; btn.textContent = 'Enviando…';
+      var g = guardas.find(function (x) { return x.user_id === b.asignado_a; });
+      var fila = { id: (crypto.randomUUID ? crypto.randomUUID() : 'vf-' + Date.now()), created_at: new Date().toISOString(), fuente: b.fuente || 'vigia_fuego',
+        titulo: b.titulo.trim() || 'Alerta Vigías del Fuego', descripcion: b.descripcion.trim() || null, lat: +(+b.lat).toFixed(6), lon: +(+b.lon).toFixed(6),
+        municipio: v ? v.mun : null, vereda: v ? v.ver : null, prioridad: b.prioridad, estado: b.asignado_a ? 'asignada' : 'nueva',
+        asignado_a: b.asignado_a || null, asignado_nombre: g ? g.nombre : null, referencia_externa: b.referencia || null,
+        creado_por: C.ses.user.id, creado_por_nombre: C.nombre || C.ses.user.email };
+      var r = await C.sb.from(CT.alertas).insert(fila);
+      if (r.error && /check|violates|constraint/i.test(r.error.message) && fila.fuente !== 'llamada') {
+        fila.fuente = b.fuenteAlterna || 'llamada'; fila.descripcion = '[Vigías del Fuego] ' + (fila.descripcion || ''); r = await C.sb.from(CT.alertas).insert(fila);
+      }
+      if (r.error) { $('#c-ferr').textContent = 'No se pudo enviar: ' + r.error.message; btn.disabled = false; btn.textContent = 'Enviar alerta a los guardabosques'; return; }
+      C.borrador = null; C.esperandoPunto = false; map.getContainer().style.cursor = ''; C.tab = 'alertas'; C.filtro = 'activas';
+      aviso('Alerta enviada a la operación de campo.'); await cargarCampo();
+    };
+    if (b.lat != null) tematica('c-nueva', { n: 'Ubicación de la nueva alerta', tipo: 'punto', c: '#12355b', f: 'Borrador de alerta', capa: L.marker([b.lat, b.lon], { pane: 'puntos', draggable: true, icon: L.divIcon({ className: '', html: '<div class="pin-nueva"></div>', iconSize: [30, 40], iconAnchor: [15, 38] }) })
+      .on('dragend', function (ev) { var ll = ev.target.getLatLng(); guardar(); b.lat = ll.lat; b.lon = ll.lng; pintar(); }) });
+    else tematica('c-nueva', null);
+  }
+
+  /* ── CAPAS DE CAMPO (mapa) ── */
+  function capasCampo() {
+    var idx = {}, ga = L.layerGroup(), gr = L.layerGroup(), gp = L.layerGroup(), gn = L.layerGroup();
+    C.al.filter(enTerritorio).filter(function (a) { return a.lat != null && (C.filtro === 'todas' || C.tab !== 'alertas' ? a.estado !== 'descartada' : C.filtro === 'activas' ? ['nueva', 'asignada', 'en_camino'].indexOf(a.estado) >= 0 : a.estado === C.filtro); }).forEach(function (a) {
+      var c = (EST_AL[a.estado] || ['', '#78909c'])[1];
+      var m = L.marker([a.lat, a.lon], { pane: 'puntos', icon: L.divIcon({ className: '', html: '<div class="pin-alerta' + (a.estado === 'nueva' ? ' viva' : '') + '" style="--c:' + c + '"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg></div>', iconSize: [30, 30], iconAnchor: [15, 15] }) })
+        .bindPopup(pp(a.titulo || 'Alerta', [['Estado', (EST_AL[a.estado] || [a.estado])[0]], ['Prioridad', a.prioridad], ['Fuente', a.fuente], ['Vereda', a._ver || a.vereda], ['Municipio', a._mun || a.municipio], ['Creada', fecha(a.created_at)], ['Asignada a', a.asignado_nombre], ['Resultado', a.resultado], ['Verificada por', a.verificado_por_nombre]]) + (a.descripcion ? '<p style="margin:6px 0 0">' + esc(a.descripcion) + '</p>' : '') +
+          (C.ses && puedeCoordinar() && ['nueva', 'asignada'].indexOf(a.estado) >= 0 ? '<button class="btn chico" style="margin-top:8px;width:100%;justify-content:center" onclick="__vfDescartar(\'' + esc(a.id) + '\')">Descartar alerta</button>' : ''));
+      idx[a.id] = m; m.addTo(ga);
+    });
+    C.rep.filter(enTerritorio).filter(function (r) { return r.lat != null; }).forEach(function (r) {
+      var c = r.estado === 'Activo' ? '#d50000' : r.estado === 'Controlado' ? '#ef6c00' : '#6d4c41';
+      L.marker([r.lat, r.lon], { pane: 'puntos', icon: L.divIcon({ className: '', html: '<div class="pin-reporte" style="--c:' + c + '"><svg viewBox="0 0 24 24"><path d="M12 22c4.4 0 7-3 7-7 0-3-1.6-5.4-3.4-7.3-.4 1.8-1.4 3.1-2.6 3.6.2-3.3-1.3-6.4-4-8.3.3 3.2-1.4 5.3-3 7.2C4.7 11.8 5 13 5 15c0 4 2.6 7 7 7Z"/></svg></div>', iconSize: [26, 26], iconAnchor: [13, 13] }) })
+        .bindPopup(pp('Reporte de campo · ' + (r.tipo_fuego || 'incendio'), [['Fecha', fecha(r.fecha_hora)], ['Estado', r.estado], ['Validación', r.validado ? 'Validado' : r.rechazado ? 'Rechazado' : 'Por validar'], ['Cobertura', r.cobertura], ['Área', r.area_ha ? fmt(r.area_ha, 1) + ' ha' : null], ['Causa probable', r.causa_probable], ['Afectación', r.afectacion], ['Vereda', r._ver || r.vereda], ['Municipio', r._mun || r.municipio], ['Origen', r.origen], ['Reportante', r.reportante]]) +
+          (r.fotos && r.fotos.length ? '<img src="' + esc(r.fotos[0]) + '" alt="Foto del reporte" style="width:100%;border-radius:8px;margin-top:6px">' : '')).addTo(gr);
+    });
+    C.pos.filter(function (p) { return p.lat != null; }).forEach(function (p) {
+      var on = Date.now() - new Date(p.updated_at) < 2 * 36e5;
+      L.marker([p.lat, p.lon], { pane: 'puntos', icon: L.divIcon({ className: '', html: '<div class="pin-guarda' + (on ? '' : ' off') + '"><svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/></svg></div>', iconSize: [28, 28], iconAnchor: [14, 14] }) })
+        .bindPopup(pp(p.nombre || 'Guardabosque', [['Última posición', fecha(p.updated_at)], ['Hace', hace(p.updated_at)], ['Precisión', p.precision ? fmt(p.precision) + ' m' : null]])).addTo(gp);
+    });
+    C.nov.filter(enTerritorio).filter(function (n) { return n.lat != null; }).forEach(function (n) {
+      L.circleMarker([n.lat, n.lon], { pane: 'puntos', radius: 6, color: '#fff', weight: 2, fillColor: '#6a1b9a', fillOpacity: 1 }).bindPopup(pp('Novedad · ' + (n.tipo || ''), [['Fecha', fecha(n.created_at)], ['Autor', n.autor_nombre], ['Prioridad', n.prioridad], ['Descripción', n.descripcion]])).addTo(gn);
+    });
+    tematica('c-al', { n: 'Alertas a campo', tipo: 'clases', f: 'Operación de campo · tabla de alertas (tiempo real)', leyenda: clasesHTML(Object.keys(EST_AL).filter(function (k) { return k !== 'descartada'; }).map(function (k) { return [EST_AL[k][1], EST_AL[k][0]]; })), capa: ga, idx: idx });
+    tematica('c-rep', { n: 'Reportes de incendio de campo', tipo: 'clases', f: 'Aplicación de guardabosques y QField', leyenda: clasesHTML([['#d50000', 'Activo'], ['#ef6c00', 'Controlado'], ['#6d4c41', 'Extinguido']]), capa: gr });
+    tematica('c-pos', { n: 'Guardabosques', tipo: 'punto', c: '#2e7d32', f: 'Última posición reportada por la aplicación', capa: gp });
+    tematica('c-nov', { n: 'Novedades de campo', tipo: 'punto', c: '#6a1b9a', f: 'Novedades registradas por los guardabosques', capa: gn });
+  }
+  window.__vfDescartar = async function (id) {
+    if (!confirm('¿Descartar esta alerta? Dejará de mostrarse a los guardabosques.')) return;
+    var r = await C.sb.from(CT.alertas).update({ estado: 'descartada' }).eq('id', id);
+    if (r.error) aviso('No se pudo descartar: ' + r.error.message); else { map.closePopup(); await cargarCampo(); }
+  };
+
+
+  /* 8. Constructor de reportes ─ genera infografía profesional en PDF */
+  function abrirConstructor() {
+    var f = $('.guia-fondo'); if (f) f.remove();
+    var terr = nombreFiltro() || 'todo Caldas';
+    var hoy = new Date().toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' });
+    var d = document.createElement('div'); d.className = 'guia-fondo'; d.id = 'rep-modal';
+    d.innerHTML = '<div class="guia" style="width:min(560px,100%)" role="dialog" aria-modal="true">' +
+      '<div class="g-cab"><div class="ic">' + ic('tabla') + '</div><div><small>Generar reporte</small><h3>Construir reporte personalizado</h3></div></div>' +
+      '<div class="g-cuerpo">' +
+      '<p style="margin-bottom:12px;font-size:13px">Seleccione las secciones que desea incluir y el estilo visual. El reporte se abre en una nueva pestaña, listo para guardar como PDF.</p>' +
+      '<label style="display:block;margin-bottom:10px"><b>Título del reporte</b><br><input type="text" id="rep-titulo" style="width:100%;font:inherit;padding:8px 10px;border:1.5px solid var(--line-strong);border-radius:8px;background:var(--surface);color:var(--ink);margin-top:4px" value="Reporte de vigilancia · ' + esc(terr) + '"></label>' +
+      '<div style="margin-bottom:10px"><b style="font-size:13px">Secciones</b></div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;margin-bottom:14px">' +
+        chk('rep-s-resumen', 'Resumen ejecutivo (KPIs)', true) +
+        chk('rep-s-mapa', 'Captura del mapa', true) +
+        chk('rep-s-vigilancia', 'Sitios prioritarios', true) +
+        chk('rep-s-incendios', 'Puntos de calor', true) +
+        chk('rep-s-deforestacion', 'Pérdida de bosque', true) +
+        chk('rep-s-clima', 'Clima y anomalías', true) +
+        chk('rep-s-campo', 'Operación de campo', C.cargado && C.ses) +
+      '</div>' +
+      '<label style="display:block;margin-bottom:6px"><b style="font-size:13px">Estilo visual</b></label>' +
+      seg('rep-tema', [['dark', 'Infografía oscura'], ['light', 'Informe claro']], 'dark') +
+      '</div>' +
+      '<div class="g-pie"><button class="btn" id="rep-cerrar">Cancelar</button><button class="btn pri" id="rep-generar">Generar reporte</button></div></div>';
+    document.body.appendChild(d);
+    d.querySelector('#rep-cerrar').onclick = function () { d.remove(); };
+    d.onclick = function (e) { if (e.target === d) d.remove(); };
+    var tema = 'dark';
+    $$('#rep-tema button').forEach(function (b) { b.onclick = function () { tema = b.dataset.v; $$('#rep-tema button').forEach(function (x) { x.setAttribute('aria-pressed', x.dataset.v === tema); }); }; });
+    d.querySelector('#rep-generar').onclick = async function () {
+      var btn = this; btn.disabled = true; btn.textContent = 'Preparando…';
+      try { await generarReporte($('#rep-titulo').value, secciones(), tema); } catch (e) { console.error(e); alert('Error al generar el reporte: ' + e.message); }
+      d.remove();
+    };
+    function secciones() {
+      return ['resumen','mapa','vigilancia','incendios','deforestacion','clima','campo'].filter(function (s) {
+        var c = $('#rep-s-' + s); return c && c.checked;
+      });
+    }
+  }
+  function chk(id, label, checked) {
+    return '<label style="display:flex;gap:6px;align-items:center;font-size:13px;cursor:pointer"><input type="checkbox" id="' + id + '"' + (checked ? ' checked' : '') + '>' + label + '</label>';
+  }
+  async function generarReporte(titulo, sec, tema) {
+    var terr = nombreFiltro() || 'todo Caldas';
+    var hoy = new Date().toISOString();
+    var payload = {
+      v: 1, titulo: titulo || 'Reporte Vigías del Fuego', subtitulo: terr + ' · ' + new Date().toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' }),
+      territorio: terr, tema: tema, generado: hoy, sec: sec, fuentes: 'NASA FIRMS (VIIRS/MODIS), IDEAM, Global Forest Watch, Open-Meteo, Corpocaldas, ANT, Supabase (operación de campo)'
+    };
+    /* Mapa */
+    if (sec.indexOf('mapa') >= 0 && window.html2canvas) {
+      try {
+        var mapEl = map.getContainer();
+        var canvas = await html2canvas(mapEl, { useCORS: true, allowTaint: true, scale: 2, logging: false, backgroundColor: null });
+        payload.mapa = canvas.toDataURL('image/jpeg', 0.88);
+      } catch (e) { console.warn('No se pudo capturar el mapa:', e); }
+    }
+    /* KPIs */
+    if (sec.indexOf('resumen') >= 0) {
+      var nv = D.vig ? D.vig.veredas.filter(function (v) { return v.nivel === 'vigilar' && pasa(v.mun, v.id); }).length : 0;
+      var na = D.vig ? D.vig.veredas.filter(function (v) { return v.nivel === 'atencion' && pasa(v.mun, v.id); }).length : 0;
+      var cal30 = detecciones(30).length, cal24 = detecciones(1).length;
+      var ha4 = 0;
+      if (D.defo) { var e0 = Date.parse(D.defo.epoca + 'T00:00:00Z'), lim4 = Date.now() - 28 * 864e5; D.defo.pts.forEach(function (p) { if (pasa(D.defo.veredas[p[4]], null) && e0 + p[2] * 864e5 >= lim4) ha4 += D.defo.ha_pixel; }); }
+      var at = D.clima ? D.clima.puntos.filter(function (p) { return pasa(p.mun, null); }).map(function (p) { return p.an_tmax_7f; }).filter(function (x) { return x != null; }) : [];
+      var atm = at.length ? at.reduce(function (a, b) { return a + b; }, 0) / at.length : null;
+      var nal = C.al ? C.al.filter(function (a) { return a.estado === 'nueva'; }).length : 0;
+      payload.kpi = { vigilar: nv, atencion: na, calor_24h: cal24, calor_30d: cal30, defo_4s_ha: Math.round(ha4 * 10) / 10, anom_temp: atm != null ? Math.round(atm * 10) / 10 : null, alertas: nal, reportes: C.rep ? C.rep.length : 0 };
+    }
+    /* Vigilancia */
+    if (sec.indexOf('vigilancia') >= 0 && D.vig) {
+      payload.vig = D.vig.veredas.filter(function (v) { return pasa(v.mun, v.id); }).slice(0, 25).map(function (v) {
+        return { p: v.puesto, v: v.ver, m: v.mun, n: v.nivel, r: Math.round(v.riesgo * 100) / 100, rz: v.razones || [] };
+      });
+    }
+    /* Incendios */
+    if (sec.indexOf('incendios') >= 0 && D.firms) {
+      var ds = detecciones(E.fuegoP);
+      var meses = {}, mk = [];
+      ds.forEach(function (d) {
+        var t = new Date(d.t), k = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0');
+        if (!meses[k]) { meses[k] = [t.toLocaleDateString('es-CO', { month: 'short', year: '2-digit' }), 0, 0]; mk.push(k); }
+        if (d.f === 'FIRMS') meses[k][1]++; else meses[k][2]++;
+      });
+      mk.sort();
+      var porVer = {}; ds.forEach(function (d) { var k = (d.ver || '?') + ' (' + (d.mun || '?') + ')'; porVer[k] = (porVer[k] || 0) + 1; });
+      var topV = Object.keys(porVer).map(function (k) { return [k, porVer[k]]; }).sort(function (a, b) { return b[1] - a[1]; });
+      payload.inc = { total: ds.length, meses: mk.map(function (k) { return meses[k]; }), top: topV.slice(0, 10) };
+    }
+    /* Deforestación */
+    if (sec.indexOf('deforestacion') >= 0 && D.defo) {
+      var semMap = {}, sk = [];
+      var e0d = Date.parse(D.defo.epoca + 'T00:00:00Z'), ha = D.defo.ha_pixel;
+      D.defo.pts.filter(function (p) { return pasa(D.defo.veredas[p[4]], null); }).forEach(function (p) {
+        var t = new Date(e0d + p[2] * 864e5), sem = isoSemana(t);
+        if (!semMap[sem]) { semMap[sem] = 0; sk.push(sem); }
+        semMap[sem] += ha;
+      });
+      sk.sort(); var totalHa = 0; sk.forEach(function (k) { totalHa += semMap[k]; });
+      var porVerD = {}; D.defo.pts.filter(function (p) { return pasa(D.defo.veredas[p[4]], null); }).forEach(function (p) {
+        var vn = D.defo.veredas[p[4]] || '?'; porVerD[vn] = (porVerD[vn] || 0) + ha;
+      });
+      var topD = Object.keys(porVerD).map(function (k) { return [k, Math.round(porVerD[k] * 10) / 10]; }).sort(function (a, b) { return b[1] - a[1]; });
+      payload.defo = { total_ha: Math.round(totalHa * 10) / 10, semanas: sk.slice(-26).map(function (k) { return [k, Math.round(semMap[k] * 10) / 10]; }), top: topD.slice(0, 10) };
+    }
+    /* Clima */
+    if (sec.indexOf('clima') >= 0 && D.clima) {
+      var pts = D.clima.puntos.filter(function (p) { return pasa(p.mun, null); });
+      var prom = function (campo) { var vs = pts.map(function (p) { return p[campo]; }).filter(function (x) { return x != null; }); return vs.length ? vs.reduce(function (a, b) { return a + b; }, 0) / vs.length : null; };
+      var vars = [];
+      var tmx = prom('an_tmax_7f'); if (tmx != null) vars.push(['Anomalía Tmax (7 días)', (tmx > 0 ? '+' : '') + tmx.toFixed(1) + ' °C']);
+      var tmn = prom('an_tmin_7f'); if (tmn != null) vars.push(['Anomalía Tmin (7 días)', (tmn > 0 ? '+' : '') + tmn.toFixed(1) + ' °C']);
+      var ll = prom('pct_prec_30'); if (ll != null) vars.push(['Lluvia 30 días vs. normal', Math.round(ll) + '%']);
+      var hr = prom('an_hr_7f'); if (hr != null) vars.push(['Anomalía HR (7 días)', (hr > 0 ? '+' : '') + hr.toFixed(0) + ' pts']);
+      payload.clima = { vars: vars, texto: 'Resumen climático para ' + terr + '. Valores promedio del área seleccionada.' };
+      /* Chart: anomalía diaria de temperatura */
+      if (D.clima.dias && D.clima.dias.length) {
+        payload.clima.chart = D.clima.dias.slice(-30).map(function (d) {
+          return [new Date(d.fecha).toLocaleDateString('es-CO', { day: 'numeric', month: 'short' }), d.an_tmax != null ? Math.round(d.an_tmax * 10) / 10 : 0];
+        });
+      }
+    }
+    /* Campo */
+    if (sec.indexOf('campo') >= 0 && C.cargado) {
+      payload.campo = {
+        nueva: C.al.filter(function (a) { return a.estado === 'nueva'; }).length,
+        asignada: C.al.filter(function (a) { return a.estado === 'asignada'; }).length,
+        en_camino: C.al.filter(function (a) { return a.estado === 'en_camino'; }).length,
+        verificada: C.al.filter(function (a) { return a.estado === 'verificada'; }).length,
+        reportes: C.rep.length,
+        guardas: C.pos.filter(function (p) { return Date.now() - new Date(p.updated_at) < 2 * 36e5; }).length,
+        novedades: C.nov.length
+      };
+    }
+    localStorage.setItem('vf_reporte', JSON.stringify(payload));
+    window.open('reporte.html', '_blank');
+  }
+
   /* ── navegación ─────────────────────────────── */
   var MOD = {
     vigilancia: { n: 'Vigilancia', t: 'Sitios a vigilar', s: 'Veredas priorizadas por riesgo de incendio y deforestación', fn: modVigilancia, tem: ['vig'] },
@@ -567,12 +1263,14 @@
     deforestacion: { n: 'Deforestación', t: 'Deforestación', s: 'Seguimiento semanal por municipio y vereda', fn: modDeforestacion, tem: ['dpts', 'xgfwt'] },
     clima: { n: 'Clima', t: 'Clima y sequía', s: 'Anomalías actuales y pronóstico a 16 días', fn: modClima, tem: ['clima', 'clima-sel'] },
     especies: { n: 'Especies', t: 'Especies', s: 'Registros biológicos y hábitat en riesgo', fn: modEspecies, tem: ['esp'] },
+    campo: { n: 'Campo', t: 'Operación de campo', s: 'Alertas a guardabosques, reportes y equipo en tiempo real', fn: modCampo, tem: ['c-al', 'c-rep', 'c-pos', 'c-nov', 'c-nueva'] },
     capas: { n: 'Capas', t: 'Capas de referencia', s: 'Conservación, agua, vías, límites e histórico', fn: modCapas, tem: [] }
   };
   function pintarRail() {
     var nv = D.vig ? D.vig.veredas.filter(function (v) { return v.nivel === 'vigilar'; }).length : 0, n24 = detecciones(1).length;
     $('#rail').innerHTML = Object.keys(MOD).map(function (k, i) {
-      var badge = k === 'vigilancia' && nv ? '<span class="badge">' + nv + '</span>' : k === 'incendios' && n24 ? '<span class="badge">' + n24 + '</span>' : '';
+      var nal = C.al.filter(function (a) { return a.estado === 'nueva'; }).length;
+      var badge = k === 'vigilancia' && nv ? '<span class="badge">' + nv + '</span>' : k === 'incendios' && n24 ? '<span class="badge">' + n24 + '</span>' : k === 'campo' && nal ? '<span class="badge">' + nal + '</span>' : '';
       return (k === 'capas' ? '<div class="esp"></div>' : '') + '<button role="tab" data-m="' + k + '" aria-selected="' + (E.mod === k) + '">' + ic(k) + MOD[k].n + badge + '</button>';
     }).join('');
     $$('#rail button').forEach(function (b) { b.onclick = function () { E.mod = b.dataset.m; pintarRail(); pintar(); $('#contenido').scrollTop = 0; }; });
@@ -631,10 +1329,11 @@
 
   /* ── guía rápida ────────────────────────────── */
   var GUIA = [
-    { ic: 'vigilancia', t: 'Bienvenido a Vigía Fuego Caldas', h: '<p>Una sola vista para la <b>vigilancia estricta</b> de incendios y deforestación en Caldas, con datos satelitales y climáticos que se actualizan solos.</p><ul><li><b>Vigilancia</b>: qué veredas revisar primero y por qué.</li><li><b>Incendios</b> y <b>Deforestación</b>: lo que detectan los satélites.</li><li><b>Clima</b>: calor y sequía frente a lo normal, con pronóstico.</li></ul>' },
+    { ic: 'vigilancia', t: 'Bienvenido a Vigías del Fuego', h: '<p>Una sola vista para la <b>vigilancia estricta</b> de incendios y deforestación en Caldas, con datos satelitales y climáticos que se actualizan solos.</p><ul><li><b>Vigilancia</b>: qué veredas revisar primero y por qué.</li><li><b>Incendios</b> y <b>Deforestación</b>: lo que detectan los satélites.</li><li><b>Clima</b>: calor y sequía frente a lo normal, con pronóstico.</li></ul>' },
     { ic: 'capas', t: '1 · Elija el territorio', h: '<p>Arriba, en <b>Territorio</b>, seleccione un <b>municipio</b> y luego una <b>vereda</b>. Todo el sistema (cifras, gráficas, tablas y mapa) se filtra a esa zona.</p><p>El botón <b>⌂</b> del mapa vuelve a todo Caldas.</p>' },
     { ic: 'incendios', t: '2 · Lea las alertas', h: '<p>Use los módulos de la barra izquierda. Cada uno abre con un recuadro verde que explica <b>qué está viendo</b>.</p><p>Haga clic en una vereda de cualquier tabla o tarjeta para ir a ella en el mapa.</p>' },
-    { ic: 'info', t: '3 · Controle el mapa', h: '<p>La <b>leyenda</b> (arriba a la derecha) muestra solo lo que está encendido: ajuste la <b>opacidad</b>, oculte capas o vea su <b>fuente</b> con ⓘ.</p><p>Abajo a la izquierda cambia el fondo: <b>Claro, Satélite o Relieve</b>. Con <b>Reporte</b> imprime o guarda en PDF.</p>' }
+    { ic: 'info', t: '3 · Controle el mapa', h: '<p>La <b>leyenda</b> (arriba a la derecha) muestra solo lo que está encendido: ajuste la <b>opacidad</b>, oculte capas o vea su <b>fuente</b> con ⓘ.</p><p>Abajo a la izquierda cambia el fondo: <b>Claro, Satélite o Relieve</b>. Con <b>Reporte</b> imprime o guarda en PDF.</p>' },
+    { ic: 'campo', t: '4 · Operación de campo', h: '<p>El módulo <b>Campo</b> conecta con la <b>aplicación de guardabosques</b>: desde aquí puede enviar alertas a los equipos y ver en tiempo real sus reportes, posiciones y verificaciones.</p><p>Inicie sesión con la misma cuenta del tablero de campo para coordinar la operación.</p>' }
   ];
   function guia(i) {
     i = i || 0; var g = GUIA[i], f = $('.guia-fondo'); if (f) f.remove();
@@ -692,8 +1391,10 @@
     iniciarMapa(); llenarFiltros();
     var h = new URLSearchParams(location.hash.slice(1)); if (h.get('m') && MOD[h.get('m')]) E.mod = h.get('m');
     pintarRail();
+    iniciarCampo();
     for (var k of Object.keys(REG)) if (REG[k].on) await encender(k, true);
     map.on('click', function (e) {
+      if (E.mod === 'campo' && C.esperandoPunto && C.borrador) { C.borrador.lat = e.latlng.lat; C.borrador.lon = e.latlng.lng; C.esperandoPunto = false; map.getContainer().style.cursor = ''; pintar(); return; }
       if (E.mod !== 'clima' || !D.clima) return;
       var best = 0, bd = 1e9; D.clima.puntos.forEach(function (p, i) { var d = Math.pow(p.lat - e.latlng.lat, 2) + Math.pow(p.lon - e.latlng.lng, 2); if (d < bd) { bd = d; best = i; } });
       E.climaSel = best; pintar();
@@ -701,7 +1402,7 @@
     var ult = [D.vig && D.vig.actualizado, D.firms && D.firms.actualizado, D.clima && D.clima.actualizado].filter(Boolean).sort().pop();
     $('#estado-datos').innerHTML = '<i></i>Actualizado ' + (ult ? hace(ult) : '–');
     $('#b-guia').onclick = function () { guia(0); };
-    $('#b-imprimir').onclick = function () { window.print(); };
+    $('#b-imprimir').onclick = function () { abrirConstructor(); };
     if (h.get('ver')) irVereda(h.get('ver'), false); else if (h.get('mun')) { F.mun = h.get('mun'); $('#f-mun').value = F.mun; llenarVeredas(); zoomFiltro(); }
     pintar();
     var nv = D.vig ? D.vig.veredas.filter(function (v) { return v.nivel === 'vigilar'; }).length : 0, ha4 = 0;

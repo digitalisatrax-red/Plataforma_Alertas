@@ -1,4 +1,4 @@
-name: Actualizar datos Vigía Fuego Caldas
+name: Actualizar datos Vigías del Fuego
 on:
   schedule:
     - cron: '17 */3 * * *'   # cada 3 h: puntos de calor FIRMS e IDEAM (+ índice de vigilancia)

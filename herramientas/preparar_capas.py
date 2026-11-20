@@ -1,4 +1,4 @@
-"""Descarga y recorta a Caldas las capas de referencia obligatorias de Vigía Fuego Caldas → data/capas/*.geojson
+"""Descarga y recorta a Caldas las capas de referencia obligatorias de Vigías del Fuego → data/capas/*.geojson
 Se corre una vez y luego mensualmente (GitHub Actions). Uso:  python herramientas/preparar_capas.py [nombre ...]
 
 Capas:
