@@ -13,14 +13,14 @@ no permite entrenar modelo) y tarea programada en un PC (se cae si el equipo est
 ## Fuentes y cómo se obtienen
 | Tema | Fuente | Acceso |
 |---|---|---|
-| Puntos de calor | NASA FIRMS (archivos públicos 7 d), IDEAM puntosdecalor | sin llave |
+| Puntos de calor (último año completo) | IDEAM puntosdecalor (365 días); NASA FIRMS: archivos anuales por país + NRT 7 d, y API de área con llave gratuita `FIRMS_MAP_KEY` para el año en curso | sin llave / llave gratuita |
 | Fuego histórico | MapBiomas Fuego Col. 1, 2000-2025 (procesado por vereda) | archivo fijo |
 | Probabilidad de incendio | IDEAM StoryMaps_IDA/Alertas_ICV | en vivo |
 | Deforestación semanal | GFW alertas integradas; teselas públicas z12 con fecha codificada (R·255+G = días desde 2014-12-31; B//100 = confianza) | sin llave |
 | Deforestación trimestral | IDEAM Hosted/DTD_Trimestral (cod_depto = 17) | sin llave |
 | Histórico | IDEAM Dinamica_Cambio_Cobertura_Bosque 1990-2024, Superficie_Bosque; Hansen/UMD v1.13 2001-2025 (teselas GFW) | en vivo |
 | Clima | Open-Meteo: archivo (normales 2016-2025) y pronóstico (30 d pasados + 16 d) | sin llave, cuota ~10 000/día |
-| Especies | GBIF (incluye SiB Colombia), UICN CR/EN/VU | sin llave |
+| Especies | Datos del equipo (SiB Colombia / GBIF) en `data/especies.geojson`, o carga directa CSV/GeoJSON en la página | archivo propio |
 | Áreas protegidas, páramos, EEP | Corpocaldas EEPNoviembre2026 (capas 1, 7, 8, 163, 165, 187), EstructuraEcologica/217 | sin llave |
 | Resguardos | ANT Resguardo_Indigena_Formalizado | sin llave |
 | Ríos | Corpocaldas red hídrica Strahler (≥5 vector; 1-4 en vivo) | sin llave |
@@ -34,15 +34,19 @@ Notas: la capa "Ríos Principales" de Corpocaldas solo trae Cauca y Magdalena; l
 `riesgo = S·(0,4 + 0,6·H) + 0,15·A` por vereda. Pesos y umbrales en `herramientas/calcular_vigilancia.py`.
 Niveles: 5 % superior = vigilar de cerca; siguiente 10 % = atención.
 
+## Diseño de la interfaz
+Estilo institucional (blanco, trazos finos, verde bosque), inspirado en el patrón de Global Forest Watch (riel de módulos,
+tarjetas de capa con interruptor, leyenda viva con opacidad y fuente) y MapBiomas Alerta (selector de territorio, tarjetas de
+indicadores). Colores cartográficos convencionales: SINAP verde, páramos lila, resguardos marrón, ríos azul, vías primarias
+rojo / secundarias naranja / terciarias amarillo, pérdida de bosque magenta (convención GFW), fuego en rampa amarillo-rojo.
+Rásters suavizados (interpolación del navegador + desenfoque leve; clima por IDW; fuego por densidad de núcleo).
+Guía rápida en la primera visita.
+
 ## Hoja de ruta
-1. **Fase 1 (hecha):** fuego, clima y anomalías, capas obligatorias, especies, índice preliminar.
-2. **Fase 2 (hecha en versión inicial):** rastreador semanal de deforestación por municipio/vereda. Pendiente:
-   alertas por correo/Telegram cuando una vereda supere un umbral semanal.
-3. **Fase 3:** modelo Random Forest entrenado sin GEE:
-   - Malla de 250 m sobre Caldas; respuesta = quema MapBiomas por año (y pérdida Hansen por año).
-   - Variables: coberturas IDEAM 100K 2024, NDVI y LST MODIS (Microsoft Planetary Computer, STAC gratis),
-     clima Open-Meteo/ERA5-Land por año, suelos SoilGrids (WCS) y suelos/erosión IDEAM, pendiente y altitud
-     (Copernicus DEM 30 m), distancia a vías, ríos y centros poblados.
-   - Validación temporal: entrenar 2001-2019, probar 2020-2025 (AUC, sensibilidad en el 10 % superior).
-   - Salida: probabilidad por celda que reemplaza a S; H pasa a usar las variables dinámicas del modelo.
-   - Contraste de anomalías con estaciones del IDEAM (sesgo pronóstico vs. reanálisis).
+1. **Fase 1 (hecha):** fuego del último año completo, clima y anomalías, capas obligatorias, índice preliminar.
+2. **Fase 2 (hecha, versión inicial):** rastreador semanal de deforestación por municipio/vereda.
+   Especies: el equipo carga sus propios datos (SiB Colombia).
+3. **Fase 3 (anclada a la aplicación de reportes de campo, por desarrollar):** los reportes verificados en campo
+   (incendio confirmado / falsa alarma, deforestación confirmada) serán la verdad de terreno para calibrar y validar
+   el modelo de sitios a vigilar (clima + coberturas + NDVI + suelos + cercanía a vías y poblados) y para medir la
+   precisión de cada fuente satelital en Caldas.

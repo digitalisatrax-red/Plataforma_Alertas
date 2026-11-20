@@ -4,45 +4,60 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SAT Caldas · Alertas</title>
-<meta name="description" content="Sistema de alertas tempranas de incendios y deforestación para Caldas: puntos de calor FIRMS e IDEAM, MapBiomas Fuego, alertas integradas GFW, histórico IDEAM y Hansen, clima Open-Meteo y sitios a vigilar.">
+<meta name="description" content="Sistema de alertas tempranas de incendios y deforestación para Caldas: puntos de calor FIRMS e IDEAM, MapBiomas Fuego, alertas GFW, histórico IDEAM y Hansen, clima y sitios a vigilar.">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="app/sat.css">
 </head>
 <body>
 <div class="app">
   <header class="top">
-    <div>
-      <h1>SAT Caldas · Alertas tempranas</h1>
-      <div class="sub" id="estado-datos">Cargando datos…</div>
+    <div class="marca">
+      <div class="logo"><svg class="i" viewBox="0 0 24 24"><path d="M12 22c4.4 0 7-3 7-7 0-3-1.6-5.4-3.4-7.3-.4 1.8-1.4 3.1-2.6 3.6.2-3.3-1.3-6.4-4-8.3.3 3.2-1.4 5.3-3 7.2C4.7 11.8 5 13 5 15c0 4 2.6 7 7 7Z"/><path d="M12 22c-1.7 0-3-1.3-3-3.2 0-1.7 1.4-2.9 3-4.8 1.6 1.9 3 3.1 3 4.8 0 1.9-1.3 3.2-3 3.2Z"/></svg></div>
+      <div>
+        <h1>SAT Caldas</h1>
+        <div class="sub">Sistema de Alertas Tempranas · Incendios y Deforestación</div>
+      </div>
     </div>
-    <div class="filtros">
+    <div class="territorio" role="group" aria-label="Territorio">
+      <span class="lbl"><svg class="i" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>Territorio</span>
       <select id="f-mun" aria-label="Municipio"><option value="">Todo Caldas</option></select>
+      <span class="sep">›</span>
       <select id="f-ver" aria-label="Vereda" disabled><option value="">Todas las veredas</option></select>
-      <button class="btn" id="b-tema" title="Cambiar tema claro/oscuro" aria-label="Cambiar tema">◐</button>
+    </div>
+    <div class="der">
+      <span class="vivo" id="estado-datos"><i></i>Cargando…</span>
+      <button class="btn" id="b-guia"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>¿Cómo usar?</button>
+      <button class="btn" id="b-imprimir" title="Imprimir o guardar en PDF"><svg class="i" viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>Reporte</button>
     </div>
   </header>
   <div class="cuerpo">
+    <nav class="rail" role="tablist" aria-label="Módulos" id="rail"></nav>
     <aside class="panel">
-      <nav class="tabs" role="tablist">
-        <button role="tab" data-tab="vigilar" aria-selected="true">Sitios a vigilar</button>
-        <button role="tab" data-tab="fuego">Fuego</button>
-        <button role="tab" data-tab="defo">Deforestación</button>
-        <button role="tab" data-tab="clima">Clima</button>
-        <button role="tab" data-tab="especies">Especies</button>
-        <button role="tab" data-tab="capas">Capas</button>
-      </nav>
+      <div class="panel-cab"><h2 id="p-titulo"></h2><p id="p-sub"></p></div>
       <div class="contenido" id="contenido"></div>
     </aside>
-    <div style="position:relative;min-height:0">
+    <div class="mapa-wrap">
       <div id="mapa"></div>
+      <div class="ctl ctl-zoom">
+        <button id="z-mas" title="Acercar" aria-label="Acercar"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+        <button id="z-menos" title="Alejar" aria-label="Alejar"><svg class="i" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+        <button id="z-casa" title="Ver todo Caldas" aria-label="Ver todo Caldas"><svg class="i" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><path d="M9 22V12h6v10"/></svg></button>
+        <button id="z-pantalla" title="Pantalla completa" aria-label="Pantalla completa"><svg class="i" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
+      </div>
+      <div class="ctl ctl-fondos" id="fondos"></div>
+      <div class="ctl leyenda-viva" id="leyenda">
+        <div class="cab" id="leyenda-cab"><svg class="i" viewBox="0 0 24 24"><path d="m12 2 10 5-10 5L2 7Z"/><path d="m2 17 10 5 10-5M2 12l10 5 10-5"/></svg><b>Leyenda y capas activas</b><span class="n" id="leyenda-n">0</span></div>
+        <div class="cuerpo-l" id="leyenda-cuerpo"></div>
+      </div>
       <div class="cargando" id="cargando">Cargando el sistema de alertas…</div>
     </div>
   </div>
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/esri-leaflet@3.0.12/dist/esri-leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 <script src="app/sat.js"></script>
 </body>
 </html>
