@@ -193,12 +193,15 @@
     var lim = D.limite.poligonos, bb = [180, 90, -180, -90];
     lim.forEach(function (p) { p[0].forEach(function (c) { bb[0] = Math.min(bb[0], c[0]); bb[1] = Math.min(bb[1], c[1]); bb[2] = Math.max(bb[2], c[0]); bb[3] = Math.max(bb[3], c[1]); }); });
     D.bounds = L.latLngBounds([bb[1], bb[0]], [bb[3], bb[2]]);
-    map = L.map('mapa', { zoomControl: false, minZoom: 8, maxBounds: D.bounds.pad(0.3), maxBoundsViscosity: 1, zoomSnap: .25 });
+    map = L.map('mapa', { zoomControl: false, minZoom: 7.5, maxBounds: D.bounds.pad(0.6), maxBoundsViscosity: .8, zoomSnap: .25, zoomAnimation: false });
     map.fitBounds(D.bounds, { padding: [20, 20] });
-    [['vigil', 410], ['etiquetas', 615], ['puntos', 620], ['mascara', 640], ['limites', 650]].forEach(function (p) { map.createPane(p[0]).style.zIndex = p[1]; });
-    map.getPane('mascara').style.pointerEvents = 'none'; map.getPane('etiquetas').style.pointerEvents = 'none';
+    [['vigil', 410], ['etiquetas', 615], ['puntos', 620], ['exterior', 640], ['limites', 650]].forEach(function (p) { map.createPane(p[0]).style.zIndex = p[1]; });
+    map.getPane('exterior').style.pointerEvents = 'none'; map.getPane('etiquetas').style.pointerEvents = 'none';
     var mundo = [[-89, -179], [-89, 179], [89, 179], [89, -179]], huecos = lim.map(function (p) { return p[0].map(function (c) { return [c[1], c[0]]; }); });
-    mascara = L.polygon([mundo].concat(huecos), { pane: 'mascara', stroke: false, fillColor: '#f5f7f6', fillOpacity: 1, interactive: false }).addTo(map);
+    // Fuera de Caldas: el mapa base se ve completo (una copia del fondo por encima de las capas de datos, recortada al
+    // exterior del departamento) atenuado con un filtro CSS. Así los datos quedan restringidos a Caldas y el fondo no se recorta.
+    D.anillos = huecos;
+    map.on('zoom viewreset zoomend moveend resize', recortarExterior);
     L.polygon(huecos, { pane: 'limites', color: '#ffffff', weight: 6, fill: false, interactive: false, opacity: .9 }).addTo(map);
     L.polygon(huecos, { pane: 'limites', color: '#12355b', weight: 2.4, fill: false, interactive: false }).addTo(map);
     L.control.scale({ imperial: false, position: 'bottomleft' }).addTo(map);
@@ -206,15 +209,25 @@
     $$('#fondos button').forEach(function (b) { b.onclick = function () { fondo(b.dataset.f); }; });
     fondo('claro');
     $('#z-mas').onclick = function () { map.zoomIn(); }; $('#z-menos').onclick = function () { map.zoomOut(); };
-    $('#z-casa').onclick = function () { F.mun = ''; F.ver = ''; $('#f-mun').value = ''; llenarVeredas(); zoomFiltro(); pintar(); };
+    $('#z-casa').onclick = function () { E.volver = null; F.mun = ''; F.ver = ''; $('#f-mun').value = ''; llenarVeredas(); zoomFiltro(); pintar(); };
     $('#z-pantalla').onclick = function () { var w = $('.mapa-wrap'); if (document.fullscreenElement) document.exitFullscreen(); else if (w.requestFullscreen) w.requestFullscreen(); };
     $('#leyenda-cab').onclick = function () { $('#leyenda').classList.toggle('cerrada'); };
   }
+  function recortarExterior() {
+    // recorte "par-impar": rectángulo grande menos los anillos de Caldas, en coordenadas de capa del panel
+    if (!map || !D.anillos) return;
+    var pane = map.getPane('exterior'), pb = map.getPixelBounds(), o = map.getPixelOrigin(), m = 4000;
+    var x0 = pb.min.x - o.x - m, y0 = pb.min.y - o.y - m, x1 = pb.max.x - o.x + m, y1 = pb.max.y - o.y + m;
+    var d = 'M' + x0 + ' ' + y0 + 'H' + x1 + 'V' + y1 + 'H' + x0 + 'Z';
+    D.anillos.forEach(function (r) { d += 'M' + r.map(function (ll) { var p = map.latLngToLayerPoint(ll); return Math.round(p.x) + ' ' + Math.round(p.y); }).join('L') + 'Z'; });
+    pane.style.clipPath = 'path(evenodd, "' + d + '")';
+  }
   function fondo(k) {
     if (fondoActual) map.removeLayer(fondoActual);
-    var base = L.tileLayer(FONDOS[k].url, { maxZoom: 19, attribution: FONDOS[k].at });
-    fondoActual = FONDOS[k].ref ? L.layerGroup([base, L.tileLayer(FONDOS[k].ref, { maxZoom: 19, pane: 'etiquetas' })]) : base;
-    fondoActual.addTo(map); base.bringToBack();
+    var base = L.tileLayer(FONDOS[k].url, { maxZoom: 19, attribution: FONDOS[k].at }), capas = [base, L.tileLayer(FONDOS[k].url, { maxZoom: 19, pane: 'exterior' })];
+    if (FONDOS[k].ref) capas.push(L.tileLayer(FONDOS[k].ref, { maxZoom: 19, pane: 'etiquetas' }), L.tileLayer(FONDOS[k].ref, { maxZoom: 19, pane: 'exterior' }));
+    fondoActual = L.layerGroup(capas).addTo(map); base.bringToBack();
+    recortarExterior();
     $$('#fondos button').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.f === k); });
   }
 
@@ -288,7 +301,7 @@
     var lista = (F.ver || F.mun) ? vs.slice(0, 80) : vs.filter(function (v) { return v.nivel !== 'normal'; }).slice(0, 80);
     el.innerHTML = ayuda('Cada vereda recibe un <b>índice de riesgo</b> que cruza el <b>clima pronosticado</b> (calor anómalo, días sin lluvia, humedad baja) con su <b>historia de fuego y deforestación</b>, la cercanía a vías y poblados y los <b>puntos de calor</b> recientes. Haga clic en una vereda para verla en el mapa.') +
       '<div class="kpis">' + kpi(nv, 'veredas para vigilar de cerca', 'alerta') + kpi(na, 'veredas en atención', 'aviso') + kpi(vs.length, 'veredas evaluadas') + '</div>' +
-      '<div class="sec"><span>' + (F.mun || F.ver ? 'Veredas de ' + esc(nombreFiltro()) : 'Prioridad en todo Caldas') + '</span><button class="btn chico" id="b-csv-vig">' + ic('bajar') + 'CSV</button></div>' +
+      '<div class="sec"><span>' + (F.ver ? 'Vereda seleccionada' : F.mun ? 'Veredas de ' + esc(F.mun) : 'Prioridad en todo Caldas') + '</span><button class="btn chico" id="b-csv-vig">' + ic('bajar') + 'CSV</button></div>' +
       '<ul class="tarjetas">' + lista.map(function (v) {
         var chips = (v.paramo ? '<span class="chip"><i style="background:#7e57c2"></i>Páramo</span>' : '') + (v.sinap ? '<span class="chip"><i style="background:#2e7d32"></i>Área protegida</span>' : '') + (v.resguardo ? '<span class="chip"><i style="background:#a0522d"></i>Resguardo</span>' : '');
         return '<li class="tarjeta ' + v.nivel + '" data-ver="' + v.id + '"><div class="t"><b>' + v.puesto + '. ' + esc(v.ver) + '</b>' + est(v.nivel) + '</div><div class="m">' + esc(v.mun) + '</div>' +
@@ -567,7 +580,14 @@
   function pintar() {
     try { history.replaceState(null, '', '#m=' + E.mod + (F.mun ? '&mun=' + encodeURIComponent(F.mun) : '') + (F.ver ? '&ver=' + F.ver : '')); } catch (e) {}
     var m = MOD[E.mod];
+    if (!F.ver) E.volver = null;
     $('#p-titulo').innerHTML = ic(E.mod) + esc(m.t); $('#p-sub').textContent = m.s;
+    var bv = $('#b-volver'); if (bv) bv.remove();
+    if (E.volver) {
+      var b = document.createElement('button'); b.id = 'b-volver'; b.className = 'btn pri volver';
+      b.innerHTML = '<svg class="i" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Volver a la lista';
+      b.onclick = volver; $('.panel-cab').appendChild(b);
+    }
     limpiarTematicas(m.tem);
     m.fn($('#contenido'));
     capasExtra();
@@ -577,8 +597,8 @@
   function llenarFiltros() {
     var muns = {}; idxVer.forEach(function (v) { muns[v.p.mun] = 1; });
     $('#f-mun').innerHTML = '<option value="">Todo Caldas</option>' + Object.keys(muns).sort(function (a, b) { return a.localeCompare(b, 'es'); }).map(function (m) { return '<option>' + esc(m) + '</option>'; }).join('');
-    $('#f-mun').onchange = function () { F.mun = this.value; F.ver = ''; llenarVeredas(); zoomFiltro(); pintar(); };
-    $('#f-ver').onchange = function () { F.ver = this.value; zoomFiltro(); pintar(); };
+    $('#f-mun').onchange = function () { E.volver = null; F.mun = this.value; F.ver = ''; llenarVeredas(); zoomFiltro(); pintar(); };
+    $('#f-ver').onchange = function () { E.volver = null; F.ver = this.value; zoomFiltro(); pintar(); };
   }
   function llenarVeredas() {
     var s = $('#f-ver');
@@ -595,9 +615,18 @@
     resaltado = L.featureGroup([L.geoJSON(fc, { pane: 'limites', style: { color: '#ffffff', weight: F.ver ? 7 : 4, fill: false, opacity: .9 }, interactive: false }), L.geoJSON(fc, { pane: 'limites', style: { color: '#f2b705', weight: F.ver ? 3.5 : 1.6, fill: false }, interactive: false })]).addTo(map);
     map.flyToBounds(resaltado.getBounds(), { padding: [30, 30], maxZoom: 14, duration: .6 });
   }
-  function irVereda(id) {
+  function irVereda(id, desdeLista) {
     var v = idxVer.find(function (x) { return String(x.p.id) === String(id); }); if (!v) return;
+    if (desdeLista !== false && !E.volver) E.volver = { mun: F.mun, ver: F.ver, centro: map.getCenter(), zoom: map.getZoom(), scroll: $('#contenido').scrollTop };
     F.mun = v.p.mun; F.ver = String(id); $('#f-mun').value = v.p.mun; llenarVeredas(); $('#f-ver').value = F.ver; zoomFiltro(); pintar();
+  }
+
+  function volver() {
+    var r = E.volver; if (!r) return; E.volver = null;
+    F.mun = r.mun; F.ver = r.ver; $('#f-mun').value = F.mun; llenarVeredas(); $('#f-ver').value = F.ver;
+    if (resaltado) { map.removeLayer(resaltado); resaltado = null; }
+    if (F.mun || F.ver) { zoomFiltro(); } else map.flyTo(r.centro, r.zoom, { duration: .6 });
+    pintar(); setTimeout(function () { $('#contenido').scrollTop = r.scroll || 0; }, 0);
   }
 
   /* ── guía rápida ────────────────────────────── */
@@ -640,7 +669,7 @@
     $('#estado-datos').innerHTML = '<i></i>Datos actualizados ' + (ult ? hace(ult) : '–');
     $('#b-guia').onclick = function () { guia(0); };
     $('#b-imprimir').onclick = function () { window.print(); };
-    if (h.get('ver')) irVereda(h.get('ver')); else if (h.get('mun')) { F.mun = h.get('mun'); $('#f-mun').value = F.mun; llenarVeredas(); zoomFiltro(); }
+    if (h.get('ver')) irVereda(h.get('ver'), false); else if (h.get('mun')) { F.mun = h.get('mun'); $('#f-mun').value = F.mun; llenarVeredas(); zoomFiltro(); }
     pintar();
     $('#cargando').remove();
     var visto = null; try { visto = localStorage.getItem('sat.guia'); } catch (e) {}

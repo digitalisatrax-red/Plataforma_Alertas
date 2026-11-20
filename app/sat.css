@@ -232,3 +232,9 @@ table.tabla .sub { color: var(--ink-3); font-size: 11.5px; }
 
 .rejilla .seg { display: grid; grid-template-columns: repeat(3, 1fr); border-radius: 12px; width: 100%; }
 .rejilla .seg button { border-radius: 9px; padding: 6px 6px; }
+
+/* Volver a la lista */
+.panel-cab { position: relative; }
+.btn.volver { margin-top: 10px; width: 100%; justify-content: center; animation: aparecer .2s var(--ease); }
+/* Fondo exterior a Caldas: se ve completo, atenuado */
+.leaflet-exterior-pane { filter: saturate(.55) brightness(1.06) contrast(.82); }
