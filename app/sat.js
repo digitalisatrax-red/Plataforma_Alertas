@@ -1,4 +1,4 @@
-/* SAT Caldas · Sistema de alertas tempranas de incendios y deforestación.
+/* Vigía Fuego Caldas · Sistema de Alerta Temprana de Incendios y Deforestación.
    Página estática: lee los JSON que generan los scripts de herramientas/ (GitHub Actions) y servicios públicos en vivo.
    La vista está restringida a Caldas (máscara + límites de navegación). Todas las capas pasan por un registro único
    (REG) que define su color cartográfico, su leyenda, su opacidad y su fuente. */
@@ -308,12 +308,12 @@
           '<div class="medidor" title="Índice ' + fmt(v.riesgo, 2) + '"><i style="width:' + Math.round(100 * v.riesgo / maxR) + '%"></i></div>' +
           (v.razones.length ? '<ul>' + v.razones.slice(0, 3).map(function (r) { return '<li>' + esc(r) + '</li>'; }).join('') + '</ul>' : '') + (chips ? '<div class="chips">' + chips + '</div>' : '') + '</li>';
       }).join('') + '</ul>' +
-      '<p class="fuente">Índice calculado ' + (D.vig ? fecha(D.vig.actualizado) : '–') + '. Versión preliminar; se calibrará con los reportes de campo de la aplicación.</p>';
+      '<p class="fuente">Índice de priorización v1.0 · calculado ' + (D.vig ? fecha(D.vig.actualizado) : '–') + '. <a href="metodologia.html#indice" target="_blank">Ver metodología</a>.</p>';
     $$('.tarjeta[data-ver]', el).forEach(function (li) { li.onclick = function () { irVereda(li.dataset.ver); }; });
     $('#b-csv-vig').onclick = function () { descargar('sitios_a_vigilar.csv', ['puesto;nivel;vereda;municipio;indice;anomalia_tmax_7d;dias_secos;lluvia_30d_pct;anios_fuego;deforestacion_90d_ha;puntos_calor_30d;paramo;area_protegida;resguardo;razones'].concat(vs.map(function (v) { return [v.puesto, NIVEL[v.nivel], v.ver, v.mun, v.riesgo, v.an_tmax_7f, v.secos, v.lluvia30_pct, v.anios_fuego, v.defo90_ha, v.calor30, v.paramo ? 'sí' : '', v.sinap ? 'sí' : '', v.resguardo ? 'sí' : '', v.razones.join(' | ')].join(';'); }))); };
     var porId = {}; todas.forEach(function (v) { porId[v.id] = v; });
     var col = { vigilar: '#c62828', atencion: '#ef6c00', normal: '#2e7d32' };
-    tematica('vig', { n: 'Veredas por nivel de vigilancia', tipo: 'clases', f: 'Índice SAT Caldas (calcular_vigilancia.py)', leyenda: clasesHTML([['#c62828', 'Vigilar de cerca'], ['#ef6c00', 'Atención']]),
+    tematica('vig', { n: 'Veredas por nivel de vigilancia', tipo: 'clases', f: 'Índice de priorización Vigía Fuego v1.0 (ver Metodología)', leyenda: clasesHTML([['#c62828', 'Vigilar de cerca'], ['#ef6c00', 'Atención']]),
       capa: L.geoJSON(D.veredas, { pane: 'vigil',
         filter: function (f) { var v = porId[f.properties.id]; return v && (v.nivel !== 'normal' || (F.mun && norm(f.properties.mun) === norm(F.mun))); },
         style: function (f) { var v = porId[f.properties.id] || {}; return { color: col[v.nivel], weight: 1.4, opacity: 1, fillColor: col[v.nivel], fillOpacity: v.nivel === 'normal' ? .06 : .32 }; },
@@ -484,7 +484,7 @@
         '<div class="leyenda" style="margin-top:8px"><span style="--c:#1565c0">Lluvia diaria (mm)</span></div><div class="grafica" id="g-lluvia"></div>' +
         '<table class="tabla" style="margin-top:8px"><tr><td>Anomalía Tmax últimos / próximos 7 días</td><td class="n">' + fmt(sel.an_tmax_7p, 1) + ' / ' + fmt(sel.an_tmax_7f, 1) + ' °C</td></tr><tr><td>Días seguidos sin lluvia</td><td class="n">' + fmt(sel.secos_hoy) + '</td></tr><tr><td>Lluvia 30 días</td><td class="n">' + fmt(sel.lluvia_30d) + ' mm (' + fmt(sel.lluvia_30d_pct) + '%)</td></tr><tr><td>Lluvia pronosticada 16 días</td><td class="n">' + fmt(sel.lluvia_fc16) + ' mm</td></tr></table>'
         : '<p class="nota">Haga clic sobre el mapa para ver la serie de 30 días observados + 16 días de pronóstico en ese lugar.</p>') +
-      '<p class="fuente">' + esc(cl.fuente) + '. Actualizado ' + hace(cl.actualizado) + '.' + (cl.normales_completas < ps.length ? ' Normales completas en ' + cl.normales_completas + ' de ' + ps.length + ' puntos (se completan solas en las próximas actualizaciones).' : '') + '</p>';
+      '<p class="fuente">' + esc(cl.fuente) + '. Actualizado ' + hace(cl.actualizado) + '.' + (cl.normales_completas < ps.length ? ' Línea base climática consolidada en ' + cl.normales_completas + ' de ' + ps.length + ' puntos de la malla.' : '') + '</p>';
     onSeg('s-var', function (v) { E.climaVar = v; });
     if (sel) {
       $('#b-cerrar-p').onclick = function () { E.climaSel = null; pintar(); };
@@ -631,7 +631,7 @@
 
   /* ── guía rápida ────────────────────────────── */
   var GUIA = [
-    { ic: 'vigilancia', t: 'Bienvenido al SAT Caldas', h: '<p>Una sola vista para la <b>vigilancia estricta</b> de incendios y deforestación en Caldas, con datos satelitales y climáticos que se actualizan solos.</p><ul><li><b>Vigilancia</b>: qué veredas revisar primero y por qué.</li><li><b>Incendios</b> y <b>Deforestación</b>: lo que detectan los satélites.</li><li><b>Clima</b>: calor y sequía frente a lo normal, con pronóstico.</li></ul>' },
+    { ic: 'vigilancia', t: 'Bienvenido a Vigía Fuego Caldas', h: '<p>Una sola vista para la <b>vigilancia estricta</b> de incendios y deforestación en Caldas, con datos satelitales y climáticos que se actualizan solos.</p><ul><li><b>Vigilancia</b>: qué veredas revisar primero y por qué.</li><li><b>Incendios</b> y <b>Deforestación</b>: lo que detectan los satélites.</li><li><b>Clima</b>: calor y sequía frente a lo normal, con pronóstico.</li></ul>' },
     { ic: 'capas', t: '1 · Elija el territorio', h: '<p>Arriba, en <b>Territorio</b>, seleccione un <b>municipio</b> y luego una <b>vereda</b>. Todo el sistema (cifras, gráficas, tablas y mapa) se filtra a esa zona.</p><p>El botón <b>⌂</b> del mapa vuelve a todo Caldas.</p>' },
     { ic: 'incendios', t: '2 · Lea las alertas', h: '<p>Use los módulos de la barra izquierda. Cada uno abre con un recuadro verde que explica <b>qué está viendo</b>.</p><p>Haga clic en una vereda de cualquier tabla o tarjeta para ir a ella en el mapa.</p>' },
     { ic: 'info', t: '3 · Controle el mapa', h: '<p>La <b>leyenda</b> (arriba a la derecha) muestra solo lo que está encendido: ajuste la <b>opacidad</b>, oculte capas o vea su <b>fuente</b> con ⓘ.</p><p>Abajo a la izquierda cambia el fondo: <b>Claro, Satélite o Relieve</b>. Con <b>Reporte</b> imprime o guarda en PDF.</p>' }
@@ -650,13 +650,46 @@
     d.onclick = function (e) { if (e.target === d) cerrar(); };
   }
 
-  /* ── arranque ───────────────────────────────── */
+  /* ── portada de monitoreo ───────────────────── */
+  var P = { meta: null, pasos: [], hechos: 0 };
+  function reloj() {
+    var el = $('#p-reloj'); if (!el) return;
+    el.textContent = new Date().toLocaleString('es-CO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'America/Bogota' }) + ' · hora de Colombia';
+  }
+  function pxPortada(lon, lat) { var m = P.meta; return [(lon - m.bbox[0]) * m.k * m.sc, (m.bbox[3] - lat) * m.sc]; }
+  function puntosPortada(lista, color, conHalo) {
+    if (!P.meta) return; var g = $('#p-puntos'), ns = 'http://www.w3.org/2000/svg', k = 0;
+    lista.forEach(function (q) {
+      var xy = pxPortada(q[1], q[0]), dl = (P.retardo = (P.retardo || 0) + 12);
+      if (conHalo && k++ < 40) { var h = document.createElementNS(ns, 'circle'); h.setAttribute('cx', xy[0]); h.setAttribute('cy', xy[1]); h.setAttribute('r', 7); h.setAttribute('fill', color); h.setAttribute('class', 'halo'); h.style.animationDelay = (Math.random() * 2).toFixed(2) + 's'; g.appendChild(h); }
+      var c = document.createElementNS(ns, 'circle'); c.setAttribute('cx', xy[0]); c.setAttribute('cy', xy[1]); c.setAttribute('r', conHalo ? 5 : 3.2); c.setAttribute('fill', color); c.setAttribute('stroke', '#fff'); c.setAttribute('stroke-width', 1.2); c.style.animationDelay = Math.min(dl, 2500) + 'ms'; g.appendChild(c);
+    });
+  }
+  function paso(id, txt) { P.pasos.push(id); $('#p-fuentes').insertAdjacentHTML('beforeend', '<li id="ps-' + id + '"><span class="st"></span>' + txt + '<small></small></li>'); }
+  function listo(id, ok, nota) {
+    var li = $('#ps-' + id); if (!li) return; li.classList.add(ok ? 'ok' : 'err'); if (nota) li.querySelector('small').textContent = nota;
+    P.hechos++; $('#p-barra').style.width = Math.round(100 * P.hechos / P.pasos.length) + '%';
+  }
+  async function cargarPaso(id, txt, fn) { paso(id, txt); try { var n = await fn(); listo(id, true, n); } catch (e) { console.warn(id, e); listo(id, false, 'sin conexión'); } }
+
   async function main() {
-    var r = await Promise.all([json('data/base/caldas_limite.json'), json('data/capas/veredas.geojson'), json('data/base/meta.json'),
-      opt('data/vigilancia.json'), opt('data/deforestacion_alertas.json'), opt('data/clima_actual.json'), opt('data/firms_caldas.json'), opt('data/ideam_caldas.json'), opt('data/especies.geojson')]);
-    D.limite = r[0]; D.veredas = r[1]; D.mbMeta = r[2]; D.vig = r[3]; D.defo = r[4]; D.clima = r[5]; D.firms = r[6]; D.ideam = r[7];
-    if (r[8] && r[8].features) D.esp = { fuente: 'data/especies.geojson', pts: r[8].features.map(function (f) { var p = f.properties || {}; return { lon: f.geometry.coordinates[0], lat: f.geometry.coordinates[1], sp: p.especie || p.species || '?', cat: String(p.categoria || p.iucnRedListCategory || '').toUpperCase(), grupo: p.grupo || p.class || '', fecha: p.fecha || p.eventDate || '' }; }) };
-    prepVeredas(); iniciarMapa(); llenarFiltros();
+    reloj(); setInterval(reloj, 1000);
+    try { P.meta = await json('app/img/caldas.svgpath'); ['p-silueta', 'p-silueta-clip', 'p-silueta-borde'].forEach(function (i) { $('#' + i).setAttribute('d', P.meta.d); }); $('#p-svg').setAttribute('viewBox', '0 0 ' + P.meta.w + ' ' + P.meta.h); } catch (e) {}
+    await Promise.all([
+      cargarPaso('lim', 'Límite departamental y veredas', async function () { var r = await Promise.all([json('data/base/caldas_limite.json'), json('data/capas/veredas.geojson'), json('data/base/meta.json')]); D.limite = r[0]; D.veredas = r[1]; D.mbMeta = r[2]; return fmt(r[1].features.length) + ' veredas'; }),
+      cargarPaso('firms', 'Puntos de calor · NASA FIRMS', async function () { D.firms = await json('data/firms_caldas.json'); return fmt(D.firms.puntos.length) + ' en 12 meses'; }),
+      cargarPaso('ideam', 'Puntos de calor · IDEAM', async function () { D.ideam = await json('data/ideam_caldas.json'); return fmt(D.ideam.pts.length) + ' en 12 meses'; }),
+      cargarPaso('gfw', 'Alertas de pérdida de bosque · GFW', async function () { D.defo = await json('data/deforestacion_alertas.json'); return 'hasta ' + fechaCorta(D.defo.ultima_alerta + 'T12:00:00'); }),
+      cargarPaso('clima', 'Clima y pronóstico a 16 días', async function () { D.clima = await json('data/clima_actual.json'); return D.clima.puntos.length + ' puntos'; }),
+      cargarPaso('vig', 'Índice de priorización por vereda', async function () { D.vig = await json('data/vigilancia.json'); return 'calculado ' + hace(D.vig.actualizado); })
+    ]);
+    var esp = await opt('data/especies.geojson');
+    if (esp && esp.features) D.esp = { fuente: 'data/especies.geojson', pts: esp.features.map(function (f) { var p = f.properties || {}; return { lon: f.geometry.coordinates[0], lat: f.geometry.coordinates[1], sp: p.especie || p.species || '?', cat: String(p.categoria || p.iucnRedListCategory || '').toUpperCase(), grupo: p.grupo || p.class || '', fecha: p.fecha || p.eventDate || '' }; }) };
+    if (!D.limite) throw new Error('No se pudo cargar el límite de Caldas');
+    prepVeredas();
+    if (D.defo) { var ep = Date.parse(D.defo.epoca + 'T00:00:00Z'), l4 = Date.now() - 28 * 864e5; puntosPortada(D.defo.pts.filter(function (p) { return ep + p[2] * 864e5 >= l4 && p[3] === 2; }).slice(0, 400), '#ad1457', false); }
+    var cal = detecciones(30); puntosPortada(cal.map(function (d) { return [d.lat, d.lon]; }), '#e64a19', true);
+    iniciarMapa(); llenarFiltros();
     var h = new URLSearchParams(location.hash.slice(1)); if (h.get('m') && MOD[h.get('m')]) E.mod = h.get('m');
     pintarRail();
     for (var k of Object.keys(REG)) if (REG[k].on) await encender(k, true);
@@ -666,14 +699,27 @@
       E.climaSel = best; pintar();
     });
     var ult = [D.vig && D.vig.actualizado, D.firms && D.firms.actualizado, D.clima && D.clima.actualizado].filter(Boolean).sort().pop();
-    $('#estado-datos').innerHTML = '<i></i>Datos actualizados ' + (ult ? hace(ult) : '–');
+    $('#estado-datos').innerHTML = '<i></i>Actualizado ' + (ult ? hace(ult) : '–');
     $('#b-guia').onclick = function () { guia(0); };
     $('#b-imprimir').onclick = function () { window.print(); };
     if (h.get('ver')) irVereda(h.get('ver'), false); else if (h.get('mun')) { F.mun = h.get('mun'); $('#f-mun').value = F.mun; llenarVeredas(); zoomFiltro(); }
     pintar();
-    $('#cargando').remove();
-    var visto = null; try { visto = localStorage.getItem('sat.guia'); } catch (e) {}
-    if (!visto && !h.get('singuia')) guia(0);
+    var nv = D.vig ? D.vig.veredas.filter(function (v) { return v.nivel === 'vigilar'; }).length : 0, ha4 = 0;
+    if (D.defo) { var e0 = Date.parse(D.defo.epoca + 'T00:00:00Z'), lim = Date.now() - 28 * 864e5; D.defo.pts.forEach(function (p) { if (e0 + p[2] * 864e5 >= lim) ha4 += D.defo.ha_pixel; }); }
+    var at = D.clima ? D.clima.puntos.map(function (p) { return p.an_tmax_7f; }).filter(function (x) { return x != null; }) : [], atm = at.length ? at.reduce(function (a, b) { return a + b; }, 0) / at.length : null;
+    $('#p-resumen').innerHTML = '<div class="r"><b>' + nv + '</b><span>veredas para vigilar de cerca</span></div><div class="n"><b>' + fmt(cal.length) + '</b><span>puntos de calor en 30 días</span></div>' +
+      '<div class="m"><b>' + fmt(ha4) + '</b><span>ha en alerta de pérdida de bosque (4 semanas)</span></div><div><b>' + (atm == null ? '–' : (atm > 0 ? '+' : '') + fmt(atm, 1) + ' °C') + '</b><span>anomalía de temperatura próximos 7 días</span></div>';
+    $('#p-resumen').hidden = false; $('#p-acciones').hidden = false;
+    var tecla;
+    var salir = function () {
+      var p = $('#portada'); if (!p || p.classList.contains('saliendo')) return; p.classList.add('saliendo'); map.invalidateSize();
+      document.removeEventListener('keydown', tecla);
+      setTimeout(function () { p.remove(); map.invalidateSize(); var visto = null; try { visto = localStorage.getItem('sat.guia'); } catch (e) {} if (!visto && !h.get('singuia')) guia(0); }, 550);
+    };
+    tecla = function (e) { if (e.key === 'Enter' || e.key === 'Escape') salir(); };
+    document.addEventListener('keydown', tecla);
+    $('#p-entrar').onclick = salir; $('#p-entrar').focus();
+    if (h.get('entrar')) salir();
   }
-  main().catch(function (e) { console.error(e); $('#cargando').textContent = 'No se pudo cargar el sistema: ' + e.message; });
+  main().catch(function (e) { console.error(e); var l = $('#p-fuentes'); if (l) l.insertAdjacentHTML('beforeend', '<li class="err"><span class="st"></span>No se pudo iniciar el sistema: ' + esc(e.message) + '</li>'); });
 })();

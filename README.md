@@ -1,53 +1,61 @@
-# SAT Caldas · Sistema de alertas tempranas de incendios y deforestación
+# Vigía Fuego Caldas
 
-Página estática (GitHub Pages) + scripts en Python que corren gratis en GitHub Actions. Sin Google Earth Engine,
-sin servidores y sin costos. La vista está restringida al departamento de Caldas.
+**Sistema de Alerta Temprana de Incendios y Deforestación del departamento de Caldas**
 
-## Qué muestra
+Gobernación de Caldas – Secretaría de Medio Ambiente · Fundación para la Conservación de la Vida Silvestre en Colombia (FCV)
 
-| Pestaña | Contenido | Fuente | Actualización |
-|---|---|---|---|
-| Sitios a vigilar | Ranking de veredas por índice de riesgo con sus razones (clima + susceptibilidad + actividad) | Cálculo propio (`calcular_vigilancia.py`) | cada 3 h / diario |
-| Incendios | Puntos de calor del último año completo (24 h · 7 d · 30 d · 12 meses), densidad, serie mensual, MapBiomas Fuego 2000-2025, probabilidad ICV | NASA FIRMS, IDEAM, MapBiomas | cada 3 h |
-| Deforestación | Rastreador semanal por municipio y vereda, CSV, puntos en mapa | GFW alertas integradas (GLAD-L, GLAD-S2, RADD, DIST) | diario |
-| Clima | Anomalías de Tmax, días secos, lluvia vs. normal, HR, DPV; serie 30 d + pronóstico 16 d | Open-Meteo (ERA5 / best_match) | diario |
-| Especies | Registros del equipo (`data/especies.geojson` o carga CSV/GeoJSON en la página) | SiB Colombia / equipo | manual |
-| Capas | Obligatorias: SINAP, páramos, EEP nov. 2026, resguardos, ríos principales, drenajes, vías primarias/secundarias/terciarias. Histórico: Hansen 2001-2025, IDEAM cambio de bosque 1990-2024, DTD trimestral IDEAM | Corpocaldas, ANT, IDEAM, GFW/UMD, OSM | mensual / en vivo |
+Vigía Fuego Caldas integra en un visor web la información satelital, climática y territorial para la vigilancia de
+incendios de la cobertura vegetal y de la pérdida de bosque en los 27 municipios y 1.208 veredas de Caldas.
 
-Enlaces directos: `index.html#m=deforestacion&mun=Samaná`, `#m=vigilancia&ver=<id vereda>`.
+## Módulos
 
-**Llave FIRMS (opcional, gratuita):** para completar el año en curso con FIRMS, pida una llave en
-https://firms.modaps.eosdis.nasa.gov/api/map_key/ y guárdela como secreto `FIRMS_MAP_KEY` del repositorio
-(Settings → Secrets and variables → Actions). Sin llave, el año se cubre con IDEAM.
+| Módulo | Contenido |
+|---|---|
+| Vigilancia | Veredas priorizadas por el índice de priorización territorial, con las razones de cada nivel |
+| Incendios | Puntos de calor NASA FIRMS e IDEAM del último año, densidad, serie mensual, frecuencia de quemas MapBiomas 2000-2025 y probabilidad de incendio del IDEAM |
+| Deforestación | Seguimiento semanal de alertas de pérdida de bosque por municipio y vereda; detección temprana trimestral del IDEAM; histórico IDEAM 1990-2024 y Hansen 2001-2025 |
+| Clima | Anomalías de temperatura, días sin lluvia, lluvia frente a lo normal, humedad y pronóstico a 16 días |
+| Especies | Registros biológicos del equipo (archivo `data/especies.geojson` o carga directa CSV/GeoJSON) |
+| Capas | Áreas protegidas SINAP, páramos, Estructura Ecológica Principal, resguardos indígenas, hidrografía, vías y límites |
 
-## Estructura
+La metodología completa está en [metodologia.html](metodologia.html).
+
+## Estructura del repositorio
 
 ```
-index.html, app/            página (Leaflet + esri-leaflet, sin compilar)
-data/base/                  datos fijos: límite de Caldas, MapBiomas Fuego por vereda, centros poblados 2026
-data/capas/                 capas de referencia recortadas a Caldas (preparar_capas.py)
-data/*.json                 datos dinámicos (FIRMS, IDEAM, GFW, clima, especies, vigilancia)
-herramientas/               scripts de actualización
-.github/workflows/          automatización
-docs/diseno.md              diseño, fuentes y hoja de ruta
+index.html            visor
+metodologia.html      metodología y documentación
+app/                  estilos, lógica del visor y logotipos
+data/base/            datos fijos (límite, MapBiomas Fuego, centros poblados)
+data/capas/           capas de referencia recortadas a Caldas
+data/*.json           datos dinámicos (puntos de calor, alertas, clima, índice)
+herramientas/         procesos de actualización
+.github/workflows/    programación de las actualizaciones
 ```
 
-## Correr localmente
+## Actualización de datos
+
+Los procesos se ejecutan automáticamente: puntos de calor e índice cada 3 horas, alertas de pérdida de bosque y clima
+cada día, capas de referencia cada mes. Para ejecutarlos manualmente:
 
 ```
 pip install -r requirements.txt
-python herramientas/preparar_capas.py        # una vez
+python herramientas/preparar_capas.py
 python herramientas/actualizar_firms.py
 python herramientas/actualizar_ideam.py
 python herramientas/actualizar_deforestacion.py
-python herramientas/actualizar_clima.py      # las normales se completan por partes (cuota gratuita)
+python herramientas/actualizar_clima.py
 python herramientas/calcular_vigilancia.py
-python -m http.server 8000                   # abrir http://localhost:8000
 ```
 
-## Advertencias
+Llave de NASA FIRMS (gratuita, opcional): permite completar con FIRMS el año en curso. Se solicita en
+https://firms.modaps.eosdis.nasa.gov/api/map_key/ y se registra como secreto `FIRMS_MAP_KEY` del repositorio.
 
-- Los puntos de calor son detecciones térmicas, no incendios confirmados.
-- Las alertas GFW de confianza nominal pueden incluir falsas alarmas (nubes); filtre por confianza alta.
-- El índice de sitios a vigilar es **preliminar** (fase 1); la fase 3 lo reemplaza por un modelo entrenado y validado.
-- Las anomalías de temperatura comparan pronóstico con normales de reanálisis y pueden tener sesgo de modelo.
+## Publicación
+
+Sitio estático compatible con GitHub Pages (rama `main`, carpeta raíz).
+
+## Fuentes
+
+NASA FIRMS · IDEAM · Global Forest Watch / Universidad de Maryland · Hansen et al. (2013) · MapBiomas Colombia ·
+Corpocaldas · Agencia Nacional de Tierras · OpenStreetMap · Open-Meteo / Copernicus ERA5.

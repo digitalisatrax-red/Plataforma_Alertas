@@ -1,4 +1,4 @@
-"""Utilidades compartidas del Sistema de Alertas Tempranas de Caldas (SAT-Caldas).
+"""Utilidades compartidas del sistema Vigía Fuego Caldas.
 Todo es gratis y sin Google Earth Engine: servicios ArcGIS públicos, Open-Meteo, GBIF y teselas de GFW."""
 import json, os, ssl, time, urllib.parse, urllib.request
 from shapely.geometry import shape, Point, mapping
@@ -16,7 +16,7 @@ BBOX = (-76.1, 4.7, -74.5, 5.9)          # oeste, sur, este, norte
 CORPO = 'https://swappweb.corpocaldas.gov.co/waserver/rest/services'
 IDEAM = 'https://visualizador.ideam.gov.co/gisserver/rest/services'
 ANT = 'https://services2.arcgis.com/RVvWzU3lgJISqdke/arcgis/rest/services'
-UA = {'User-Agent': 'Mozilla/5.0 (SAT-Caldas; datos abiertos)'}
+UA = {'User-Agent': 'Mozilla/5.0 (VigiaFuego-Caldas; datos abiertos)'}
 
 _ctx_laxo = ssl.create_default_context(); _ctx_laxo.check_hostname = False; _ctx_laxo.verify_mode = ssl.CERT_NONE
 

@@ -14,7 +14,7 @@ SALIDA = os.path.join(RAIZ, 'data', 'firms_caldas.json')
 LIMITE = os.path.join(RAIZ, 'data', 'base', 'caldas_limite.json')
 DIAS = 365
 LAT = (4.7, 5.9); LON = (-76.1, -74.5)
-UA = {'User-Agent': 'SAT-Caldas/1.0 (datos abiertos)'}
+UA = {'User-Agent': 'VigiaFuego-Caldas/1.0 (datos abiertos)'}
 NRT = 'https://firms.modaps.eosdis.nasa.gov/data/active_fire/'
 SENSORES = {  # clave interna: (archivo NRT 7d, carpeta país, prefijo país, fuente API)
     'VIIRS_SNPP': ('suomi-npp-viirs-c2/csv/SUOMI_VIIRS_C2_South_America_7d.csv', 'viirs-snpp', 'viirs-snpp', 'VIIRS_SNPP_NRT'),

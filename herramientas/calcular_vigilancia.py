@@ -1,4 +1,4 @@
-"""Sitios a vigilar de cerca (índice preliminar, fase 1) por vereda.
+"""Índice de priorización de veredas para vigilancia (versión 1.0).
 
   riesgo = S · (0,4 + 0,6·H) + 0,15·A
   S  susceptibilidad (0-1, rangos percentiles entre veredas):
@@ -14,7 +14,7 @@
   A  actividad: puntos de calor FIRMS/IDEAM en la vereda últimos 30 días (3 o más = 1)
 Niveles: 'vigilar' = 5 % superior, 'atencion' = siguiente 10 %, 'normal' = resto.
 Se marca si la vereda toca páramo, área SINAP o resguardo indígena (valores a proteger).
-En la fase 3 S se reemplaza por la probabilidad del modelo entrenado (Random Forest) y H por sus variables dinámicas."""
+Calibración prevista con los reportes verificados en campo (aplicación de reportes)."""
 import sys, os, math, datetime as dt
 sys.path.insert(0, os.path.dirname(__file__))
 from comun import *
@@ -165,7 +165,7 @@ def main():
     for k, f in enumerate(filas):
         f['puesto'] = k + 1
         f['nivel'] = 'vigilar' if k < 0.05 * n else ('atencion' if k < 0.15 * n else 'normal')
-    guardar('vigilancia.json', {'metodo': 'Índice preliminar fase 1 (ver herramientas/calcular_vigilancia.py)',
+    guardar('vigilancia.json', {'metodo': 'Índice de priorización v1.0 (ver metodologia.html)',
                                 'actualizado': ahora.strftime('%Y-%m-%dT%H:%M:%SZ'), 'clima_hoy': cl.get('hoy'), 'veredas': filas})
     print('Top 10:')
     for f in filas[:10]: print('  %2d %-28s %-12s R=%.3f  %s' % (f['puesto'], f['ver'], f['mun'], f['riesgo'], '; '.join(f['razones'][:3])))

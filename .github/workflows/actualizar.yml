@@ -1,4 +1,4 @@
-name: Actualizar SAT Caldas
+name: Actualizar datos Vigía Fuego Caldas
 on:
   schedule:
     - cron: '17 */3 * * *'   # cada 3 h: puntos de calor FIRMS e IDEAM (+ índice de vigilancia)
@@ -77,6 +77,6 @@ jobs:
           git config user.email "github-actions@users.noreply.github.com"
           git add data
           git diff --cached --quiet && exit 0
-          git commit -m "Datos SAT Caldas (actualización automática)"
+          git commit -m "Actualización automática de datos"
           for i in 1 2 3; do git pull --rebase -X theirs && git push && exit 0; sleep 5; done
           exit 1

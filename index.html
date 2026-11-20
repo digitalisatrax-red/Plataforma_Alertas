@@ -3,21 +3,68 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SAT Caldas · Alertas</title>
-<meta name="description" content="Sistema de alertas tempranas de incendios y deforestación para Caldas: puntos de calor FIRMS e IDEAM, MapBiomas Fuego, alertas GFW, histórico IDEAM y Hansen, clima y sitios a vigilar.">
+<title>Vigía Fuego Caldas</title>
+<meta name="description" content="Vigía Fuego Caldas: Sistema de Alerta Temprana de Incendios y Deforestación del departamento de Caldas. Gobernación de Caldas · Secretaría de Medio Ambiente y Fundación para la Conservación de la Vida Silvestre en Colombia (FCV).">
+<meta name="theme-color" content="#0b6e4f">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%230b6e4f'/%3E%3Cpath d='M12 20c3.3 0 5.3-2.3 5.3-5.3 0-2.3-1.2-4-2.6-5.5-.3 1.4-1 2.3-2 2.7.2-2.5-1-4.8-3-6.2.2 2.4-1 4-2.3 5.4C6.5 12.3 6.7 13.2 6.7 14.7c0 3 2 5.3 5.3 5.3Z' fill='%23fff'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="app/sat.css">
+<link rel="stylesheet" href="app/portada.css">
 </head>
 <body>
+
+<!-- ══ Portada de monitoreo (pantalla de carga) ══ -->
+<section class="portada" id="portada" aria-label="Portada">
+  <div class="p-trama" aria-hidden="true"></div>
+  <header class="p-logos">
+    <img src="app/img/logo-gobernacion.png" alt="Gobierno de Caldas · Secretaría de Medio Ambiente">
+    <span class="p-div"></span>
+    <img src="app/img/logo-fcv.png" alt="Fundación para la Conservación de la Vida Silvestre en Colombia (FCV)">
+  </header>
+  <div class="p-centro">
+    <div class="p-texto">
+      <span class="p-estado"><i></i>Monitoreo activo · 24/7</span>
+      <h1 class="p-nombre">Vigía <b>Fuego</b><span>Caldas</span></h1>
+      <p class="p-lema">Sistema de Alerta Temprana de Incendios y Deforestación del departamento de Caldas</p>
+      <div class="p-reloj" id="p-reloj">&nbsp;</div>
+      <ul class="p-fuentes" id="p-fuentes"></ul>
+      <div class="p-barra"><i id="p-barra"></i></div>
+      <div class="p-resumen" id="p-resumen" hidden></div>
+      <div class="p-acciones" id="p-acciones" hidden>
+        <button class="btn pri grande" id="p-entrar">Ingresar al monitoreo<svg class="i" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+        <a class="btn grande" href="metodologia.html">Metodología y documentación</a>
+      </div>
+    </div>
+    <div class="p-mapa" aria-hidden="true">
+      <svg id="p-svg" viewBox="0 0 1000 760">
+        <defs>
+          <clipPath id="p-clip"><path id="p-silueta-clip"/></clipPath>
+          <radialGradient id="p-glow" cx="50%" cy="50%" r="60%"><stop offset="0" stop-color="#0f8a63" stop-opacity=".16"/><stop offset="1" stop-color="#0f8a63" stop-opacity="0"/></radialGradient>
+        </defs>
+        <circle cx="500" cy="380" r="470" fill="url(#p-glow)"/>
+        <g class="p-anillos"><circle cx="500" cy="380" r="140"/><circle cx="500" cy="380" r="260"/><circle cx="500" cy="380" r="380"/></g>
+        <path id="p-silueta" class="p-silueta"/>
+        <g clip-path="url(#p-clip)">
+          <g class="p-radar"><path d="M500 380 L500 -300 A680 680 0 0 1 1089 40 Z"/></g>
+          <g id="p-puntos"></g>
+        </g>
+        <path id="p-silueta-borde" class="p-silueta-borde"/>
+      </svg>
+      <div class="p-leyenda"><span><i class="f"></i>Puntos de calor 30 días</span><span><i class="d"></i>Alertas de deforestación 4 semanas</span></div>
+    </div>
+  </div>
+  <footer class="p-pie">Gobernación de Caldas · Secretaría de Medio Ambiente &nbsp;·&nbsp; Fundación para la Conservación de la Vida Silvestre en Colombia</footer>
+</section>
+
 <div class="app">
   <header class="top">
     <div class="marca">
       <div class="logo"><svg class="i" viewBox="0 0 24 24"><path d="M12 22c4.4 0 7-3 7-7 0-3-1.6-5.4-3.4-7.3-.4 1.8-1.4 3.1-2.6 3.6.2-3.3-1.3-6.4-4-8.3.3 3.2-1.4 5.3-3 7.2C4.7 11.8 5 13 5 15c0 4 2.6 7 7 7Z"/><path d="M12 22c-1.7 0-3-1.3-3-3.2 0-1.7 1.4-2.9 3-4.8 1.6 1.9 3 3.1 3 4.8 0 1.9-1.3 3.2-3 3.2Z"/></svg></div>
       <div>
-        <h1>SAT Caldas</h1>
-        <div class="sub">Sistema de Alertas Tempranas · Incendios y Deforestación</div>
+        <h1>Vigía <b>Fuego</b> Caldas</h1>
+        <div class="sub">Alerta temprana de incendios y deforestación</div>
       </div>
     </div>
     <div class="territorio" role="group" aria-label="Territorio">
@@ -28,8 +75,13 @@
     </div>
     <div class="der">
       <span class="vivo" id="estado-datos"><i></i>Cargando…</span>
-      <button class="btn" id="b-guia"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>¿Cómo usar?</button>
-      <button class="btn" id="b-imprimir" title="Imprimir o guardar en PDF"><svg class="i" viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>Reporte</button>
+      <a class="btn" href="metodologia.html" target="_blank" title="Metodología y documentación"><svg class="i" viewBox="0 0 24 24"><path d="M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2ZM22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8Z"/></svg><span class="txt">Metodología</span></a>
+      <button class="btn" id="b-guia" title="Guía rápida de uso"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg><span class="txt">¿Cómo usar?</span></button>
+      <button class="btn" id="b-imprimir" title="Imprimir o guardar en PDF"><svg class="i" viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg><span class="txt">Reporte</span></button>
+      <div class="logos-top">
+        <img src="app/img/logo-gobernacion.png" alt="Gobierno de Caldas · Secretaría de Medio Ambiente">
+        <img src="app/img/logo-fcv.png" alt="FCV">
+      </div>
     </div>
   </header>
   <div class="cuerpo">
@@ -51,7 +103,6 @@
         <div class="cab" id="leyenda-cab"><svg class="i" viewBox="0 0 24 24"><path d="m12 2 10 5-10 5L2 7Z"/><path d="m2 17 10 5 10-5M2 12l10 5 10-5"/></svg><b>Leyenda y capas activas</b><span class="n" id="leyenda-n">0</span></div>
         <div class="cuerpo-l" id="leyenda-cuerpo"></div>
       </div>
-      <div class="cargando" id="cargando">Cargando el sistema de alertas…</div>
     </div>
   </div>
 </div>

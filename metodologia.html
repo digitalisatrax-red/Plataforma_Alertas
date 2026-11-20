@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Metodología · Vigía Fuego Caldas</title>
+<meta name="description" content="Metodología, fuentes de información, procesamiento, índice de priorización y limitaciones del Sistema de Alerta Temprana de Incendios y Deforestación Vigía Fuego Caldas.">
+<meta name="theme-color" content="#0b6e4f">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%230b6e4f'/%3E%3Cpath d='M12 20c3.3 0 5.3-2.3 5.3-5.3 0-2.3-1.2-4-2.6-5.5-.3 1.4-1 2.3-2 2.7.2-2.5-1-4.8-3-6.2.2 2.4-1 4-2.3 5.4C6.5 12.3 6.7 13.2 6.7 14.7c0 3 2 5.3 5.3 5.3Z' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="app/sat.css">
+<link rel="stylesheet" href="app/portada.css">
+<style>
+  body { background: var(--bg); overflow: auto; }
+  .doc-top { position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,.94); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+  .doc-top .in { max-width: 1180px; margin: 0 auto; display: flex; align-items: center; gap: 16px; padding: 10px 24px; }
+  .doc-top .logos { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+  .doc-top .logos img { height: 34px; } .doc-top .logos img + img { height: 32px; }
+  .doc-top::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 3px; background: linear-gradient(90deg, var(--brand) 0 33%, #f2b705 33% 66%, var(--navy) 66%); }
+  .portadilla { background: #fff; border-bottom: 1px solid var(--line); }
+  .portadilla .in { max-width: 1180px; margin: 0 auto; padding: 44px 24px 34px; }
+  .portadilla small { color: var(--brand); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; font-size: 12px; }
+  .portadilla h1 { font-size: clamp(30px, 4vw, 46px); letter-spacing: -.03em; font-weight: 800; margin: 8px 0 10px; }
+  .portadilla h1 b { background: linear-gradient(90deg, #f9a825, #ef6c00 45%, #c62828); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .portadilla p { font-size: 17px; color: var(--ink-2); max-width: 760px; margin: 0; }
+  .portadilla .meta { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 18px; font-size: 13px; color: var(--ink-3); }
+  .doc { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: 240px 1fr; gap: 40px; padding: 28px 24px 60px; }
+  .indice { position: sticky; top: 84px; align-self: start; font-size: 13.5px; }
+  .indice b { display: block; font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px; }
+  .indice a { display: block; padding: 6px 10px; border-left: 2px solid var(--line); color: var(--ink-2); text-decoration: none; transition: border-color .15s, color .15s, background .15s; }
+  .indice a:hover { color: var(--brand); border-left-color: var(--brand); background: var(--brand-tint); }
+  article { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 34px 40px; min-width: 0; }
+  article h2 { font-size: 23px; margin: 38px 0 12px; padding-top: 10px; scroll-margin-top: 90px; display: flex; align-items: center; gap: 10px; }
+  article h2:first-child { margin-top: 0; }
+  article h2 .nro { width: 30px; height: 30px; border-radius: 9px; background: var(--brand-tint); color: var(--brand); display: grid; place-items: center; font-size: 14px; flex: none; }
+  article h3 { font-size: 16.5px; margin: 22px 0 8px; }
+  article p, article li { font-size: 15px; line-height: 1.65; color: var(--ink-2); }
+  article ul { padding-left: 20px; }
+  article table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin: 12px 0 6px; }
+  article th { text-align: left; background: var(--surface-2); color: var(--ink-2); font-weight: 600; padding: 9px 10px; border-bottom: 1px solid var(--line-strong); }
+  article td { padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; color: var(--ink-2); }
+  article td b { color: var(--ink); }
+  .formula { background: var(--surface-2); border: 1px solid var(--line); border-left: 4px solid var(--brand); border-radius: 10px; padding: 14px 18px; font-size: 17px; font-weight: 600; color: var(--ink); margin: 12px 0; font-variant-numeric: tabular-nums; }
+  .caja { border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; margin: 12px 0; background: #fff; }
+  .caja.aviso { background: #fff8e1; border-color: #f6e0a3; }
+  .tarjetas3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 14px 0; }
+  .tarjetas3 div { border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+  .tarjetas3 b { display: block; color: var(--ink); margin-bottom: 4px; }
+  .tarjetas3 span { font-size: 13.5px; color: var(--ink-2); line-height: 1.5; }
+  .flujo { display: flex; align-items: stretch; gap: 8px; margin: 14px 0; flex-wrap: wrap; }
+  .flujo div { flex: 1 1 140px; border: 1px solid var(--line); border-radius: 12px; padding: 12px; font-size: 13.5px; color: var(--ink-2); background: var(--surface); position: relative; }
+  .flujo div b { display: block; color: var(--brand); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+  .creditos { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; margin-top: 10px; }
+  .creditos img { height: 60px; }
+  .pie-doc { text-align: center; font-size: 12.5px; color: var(--ink-3); padding: 24px; border-top: 1px solid var(--line); background: #fff; }
+  code { background: var(--surface-2); border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px; font-size: .9em; }
+  @media (max-width: 900px) { .doc { grid-template-columns: 1fr; } .indice { position: static; } article { padding: 22px 18px; } .tarjetas3 { grid-template-columns: 1fr; } .doc-top .logos img { height: 26px; } }
+  @media print { .doc-top, .indice { display: none; } .doc { grid-template-columns: 1fr; } article { border: 0; } }
+</style>
+</head>
+<body>
+<header class="doc-top"><div class="in">
+  <a href="index.html" class="marca" style="text-decoration:none;color:inherit">
+    <div class="logo"><svg class="i" viewBox="0 0 24 24"><path d="M12 22c4.4 0 7-3 7-7 0-3-1.6-5.4-3.4-7.3-.4 1.8-1.4 3.1-2.6 3.6.2-3.3-1.3-6.4-4-8.3.3 3.2-1.4 5.3-3 7.2C4.7 11.8 5 13 5 15c0 4 2.6 7 7 7Z"/></svg></div>
+    <div><h1>Vigía <b>Fuego</b> Caldas</h1><div class="sub">Metodología y documentación</div></div>
+  </a>
+  <a class="btn" href="index.html#m=vigilancia&entrar=1" style="margin-left:12px"><svg class="i" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Volver al monitoreo</a>
+  <div class="logos"><img src="app/img/logo-gobernacion.png" alt="Gobierno de Caldas · Secretaría de Medio Ambiente"><img src="app/img/logo-fcv.png" alt="FCV"></div>
+</div></header>
+
+<section class="portadilla"><div class="in">
+  <small>Documento técnico · versión 1.0 · noviembre de 2026</small>
+  <h1>Metodología del Sistema de Alerta Temprana <b>Vigía Fuego Caldas</b></h1>
+  <p>Fuentes de información, procesamiento, índice de priorización territorial, frecuencia de actualización, alcances y limitaciones del sistema de monitoreo de incendios de la cobertura vegetal y pérdida de bosque en el departamento de Caldas.</p>
+  <div class="meta"><span>Área: departamento de Caldas (27 municipios · 1.208 veredas)</span><span>Sistema de referencia: WGS84 (EPSG:4326)</span><span>Actualización: automática, cada 3 horas a mensual</span></div>
+</div></section>
+
+<div class="doc">
+  <nav class="indice"><b>Contenido</b>
+    <a href="#proposito">1. Propósito y alcance</a><a href="#arquitectura">2. Funcionamiento general</a><a href="#fuentes">3. Fuentes de información</a>
+    <a href="#incendios">4. Incendios</a><a href="#deforestacion">5. Pérdida de bosque</a><a href="#clima">6. Clima y sequía</a>
+    <a href="#indice">7. Índice de priorización</a><a href="#capas">8. Capas de referencia</a><a href="#actualizacion">9. Actualización</a>
+    <a href="#limitaciones">10. Alcances y limitaciones</a><a href="#protocolo">11. Uso operativo</a><a href="#glosario">12. Glosario</a><a href="#citar">13. Cómo citar y créditos</a>
+  </nav>
+  <article>
+    <h2 id="proposito"><span class="nro">1</span>Propósito y alcance</h2>
+    <p>Vigía Fuego Caldas es un sistema de alerta temprana que integra, en una sola vista, la información satelital, climática y territorial necesaria para la <b>vigilancia estricta de incendios de la cobertura vegetal y de la pérdida de bosque</b> en el departamento de Caldas. Su propósito es apoyar la toma de decisiones de las autoridades ambientales, los organismos de gestión del riesgo y las organizaciones de conservación, en especial durante temporadas secas y eventos de El Niño.</p>
+    <div class="tarjetas3">
+      <div><b>Detectar</b><span>Puntos de calor y alertas de pérdida de bosque en cuanto son publicados por las agencias que los generan.</span></div>
+      <div><b>Priorizar</b><span>Veredas donde coinciden condiciones climáticas adversas, antecedentes de fuego y presión sobre el bosque.</span></div>
+      <div><b>Orientar</b><span>La verificación en campo y la gestión preventiva en áreas protegidas, páramos y resguardos indígenas.</span></div>
+    </div>
+    <p>La cobertura geográfica es el departamento de Caldas. Toda la información temática se recorta al límite departamental; el mapa base se muestra completo como referencia.</p>
+
+    <h2 id="arquitectura"><span class="nro">2</span>Funcionamiento general</h2>
+    <div class="flujo">
+      <div><b>1 · Captura</b>Descarga automática desde servicios oficiales y abiertos (NASA, IDEAM, GFW, Corpocaldas, ANT, Open-Meteo).</div>
+      <div><b>2 · Procesamiento</b>Recorte a Caldas, asignación de municipio y vereda, depuración de duplicados y cálculo de anomalías.</div>
+      <div><b>3 · Priorización</b>Cálculo del índice por vereda combinando susceptibilidad, peligro climático y actividad.</div>
+      <div><b>4 · Publicación</b>Visor web institucional con filtros por municipio y vereda, tablas descargables y reporte imprimible.</div>
+    </div>
+    <p>El sistema opera sin servidores dedicados ni licencias: los procesos de actualización se ejecutan de forma programada en la plataforma de integración continua del repositorio institucional y el visor se publica como sitio web estático.</p>
+
+    <h2 id="fuentes"><span class="nro">3</span>Fuentes de información</h2>
+    <table>
+      <thead><tr><th>Componente</th><th>Producto</th><th>Entidad</th><th>Resolución</th><th>Actualización</th></tr></thead>
+      <tbody>
+        <tr><td><b>Puntos de calor</b></td><td>FIRMS: VIIRS S-NPP, NOAA-20, NOAA-21 (375 m) y MODIS (1 km)</td><td>NASA LANCE / FIRMS</td><td>375 m – 1 km</td><td>Cada 3 h</td></tr>
+        <tr><td><b>Puntos de calor</b></td><td>Monitoreo de puntos de calor</td><td>IDEAM</td><td>375 m – 1 km</td><td>Cada 3 h</td></tr>
+        <tr><td><b>Probabilidad de incendio</b></td><td>Alertas por incendios de la cobertura vegetal (ICV)</td><td>IDEAM</td><td>Polígonos</td><td>Según IDEAM</td></tr>
+        <tr><td><b>Fuego histórico</b></td><td>MapBiomas Fuego Colombia, Colección 1 (2000-2025)</td><td>MapBiomas Colombia</td><td>30 m</td><td>Anual</td></tr>
+        <tr><td><b>Pérdida de bosque semanal</b></td><td>Alertas integradas GLAD-L, GLAD-S2, RADD y DIST-ALERT</td><td>Global Forest Watch / Universidad de Maryland</td><td>10 – 30 m</td><td>Diaria</td></tr>
+        <tr><td><b>Detección temprana trimestral</b></td><td>Detección Temprana de Deforestación (DTD)</td><td>IDEAM – SMByC</td><td>Puntos</td><td>Trimestral</td></tr>
+        <tr><td><b>Pérdida histórica</b></td><td>Cambio de cobertura de bosque 1990-2024; Bosque/No bosque 2024</td><td>IDEAM – SMByC</td><td>30 m</td><td>Anual</td></tr>
+        <tr><td><b>Pérdida histórica</b></td><td>Global Forest Change v1.13 (2001-2025)</td><td>Hansen / UMD / Google / USGS / NASA</td><td>30 m</td><td>Anual</td></tr>
+        <tr><td><b>Clima</b></td><td>Pronóstico y reanálisis (ERA5 / ERA5-Land, modelos globales)</td><td>Open-Meteo (Copernicus, ECMWF, NOAA, DWD)</td><td>≈ 9 – 11 km, ajuste por elevación</td><td>Diaria</td></tr>
+        <tr><td><b>Áreas protegidas y EEP</b></td><td>Estructura Ecológica Principal, noviembre 2026 (SINAP, páramos, RNSC, Ley 2ª)</td><td>Corpocaldas</td><td>1:25.000</td><td>Mensual</td></tr>
+        <tr><td><b>Resguardos indígenas</b></td><td>Resguardos indígenas formalizados</td><td>Agencia Nacional de Tierras</td><td>Vectorial</td><td>Mensual</td></tr>
+        <tr><td><b>Hidrografía</b></td><td>Red hídrica por orden de Strahler</td><td>Corpocaldas</td><td>1:25.000</td><td>Mensual</td></tr>
+        <tr><td><b>Vías</b></td><td>Jerarquía funcional (primaria, secundaria, terciaria); red vial departamental</td><td>OpenStreetMap; Corpocaldas</td><td>Vectorial</td><td>Mensual</td></tr>
+        <tr><td><b>División territorial</b></td><td>Municipios, veredas, centros poblados y suelo urbano 2026</td><td>Corpocaldas</td><td>1:25.000</td><td>Mensual</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="incendios"><span class="nro">4</span>Incendios</h2>
+    <h3>4.1 Puntos de calor del último año</h3>
+    <p>Se integran los puntos de calor de los últimos 365 días. Para NASA FIRMS se combinan los archivos anuales por país (años cerrados), la consulta por área del año en curso y los archivos casi en tiempo real de 7 días, que se acumulan en cada actualización. Para el IDEAM se consulta directamente el servicio de puntos de calor con una ventana de 365 días.</p>
+    <ul>
+      <li><b>Recorte</b>: cada detección se conserva solo si cae dentro del polígono oficial de Caldas.</li>
+      <li><b>Asignación territorial</b>: a cada punto se le asigna municipio y vereda por intersección espacial.</li>
+      <li><b>Depuración de duplicados</b>: un punto IDEAM se considera la misma detección que uno de FIRMS si está a menos de 0,01° (≈ 1,1 km) y ±15 minutos.</li>
+      <li><b>Visualización</b>: densidad de núcleo (radio 22 px) para identificar focos recurrentes y puntos clasificados por antigüedad (≤ 24 h, ≤ 7 días, ≤ 30 días, mayor).</li>
+    </ul>
+    <h3>4.2 Contexto histórico</h3>
+    <p>La frecuencia de quemas 2000-2025 de MapBiomas Fuego expresa el número de años en que cada píxel de 30 m registró área quemada. Para su visualización se aplica un suavizado espacial; el cálculo por vereda utiliza el dato original.</p>
+    <div class="caja aviso"><b>Importante:</b> un punto de calor es una anomalía térmica detectada por satélite; no equivale a un incendio confirmado. Puede corresponder a quemas agrícolas, superficies calientes o reflejos. Toda detección debe verificarse en campo.</div>
+
+    <h2 id="deforestacion"><span class="nro">5</span>Pérdida de bosque</h2>
+    <h3>5.1 Seguimiento semanal</h3>
+    <p>Se usan las alertas integradas de Global Forest Watch, que combinan GLAD-L (Landsat), GLAD-S2 (Sentinel-2), RADD (radar Sentinel-1) y DIST-ALERT. Cada píxel de alerta conserva su fecha de detección y su nivel de confianza (nominal o alta). Los píxeles se recortan a Caldas, se asignan a municipio y vereda y se agregan por semana ISO.</p>
+    <ul>
+      <li><b>Superficie</b>: área por píxel ≈ 0,145 ha a la latitud de Caldas (resolución de lectura de 38 m).</li>
+      <li><b>Indicadores</b>: hectáreas de la última semana publicada, de las últimas 4 semanas y su variación frente a las 4 semanas anteriores.</li>
+      <li><b>Confianza</b>: el visor permite filtrar solo las alertas de confianza alta, recomendadas para la verificación prioritaria.</li>
+    </ul>
+    <h3>5.2 Información oficial y referencias históricas</h3>
+    <p>Las Detecciones Tempranas de Deforestación (DTD) del IDEAM-SMByC se incorporan como puntos trimestrales para Caldas. El cambio de bosque 1990-2024 del IDEAM y la pérdida de cobertura arbórea de Hansen et al. (2001-2025, umbral de dosel ≥ 30 %) se consultan en línea como contexto histórico.</p>
+
+    <h2 id="clima"><span class="nro">6</span>Clima y sequía</h2>
+    <p>Se construye una malla regular de 0,1° (79 nodos dentro de Caldas). Para cada nodo se obtienen los últimos 30 días y el pronóstico a 16 días de temperatura máxima y media, humedad relativa, precipitación, evapotranspiración de referencia, déficit de presión de vapor y viento. Los valores se ajustan a la elevación del nodo mediante un modelo digital de elevación de 90 m.</p>
+    <ul>
+      <li><b>Línea base</b>: promedio diario 2016-2025 con ventana móvil de 31 días, calculado a partir del reanálisis ERA5 / ERA5-Land.</li>
+      <li><b>Anomalía de temperatura máxima</b>: diferencia entre el valor observado o pronosticado y la línea base de la misma fecha (7 días pasados, 7 y 16 días futuros).</li>
+      <li><b>Días seguidos sin lluvia</b>: días consecutivos con precipitación inferior a 1 mm.</li>
+      <li><b>Lluvia de 30 días frente a lo normal</b>: precipitación acumulada en 30 días como porcentaje de la acumulada normal.</li>
+      <li><b>Visualización</b>: superficie continua interpolada por distancia inversa ponderada.</li>
+    </ul>
+
+    <h2 id="indice"><span class="nro">7</span>Índice de priorización territorial</h2>
+    <p>El índice ordena las 1.208 veredas de Caldas según la necesidad de vigilancia. Combina tres componentes:</p>
+    <div class="formula">Riesgo = S × (0,4 + 0,6 × H) + 0,15 × A</div>
+    <table>
+      <thead><tr><th>Componente</th><th>Variable</th><th>Peso</th><th>Escalamiento</th></tr></thead>
+      <tbody>
+        <tr><td rowspan="4"><b>S · Susceptibilidad</b><br>(0 a 1)</td><td>Área quemada histórica por km² (MapBiomas 2000-2025)</td><td>0,40</td><td rowspan="4">Rango percentil entre veredas</td></tr>
+        <tr><td>Años con fuego registrado</td><td>0,20</td></tr>
+        <tr><td>Pérdida de bosque de los últimos 90 días (confianza alta con doble peso)</td><td>0,20</td></tr>
+        <tr><td>Cercanía a vías primarias/secundarias y a centros poblados</td><td>0,20</td></tr>
+        <tr><td rowspan="4"><b>H · Peligro climático</b><br>(0 a 1)</td><td>Anomalía de temperatura máxima, próximos 7 días</td><td>0,35</td><td>+3 °C = 1</td></tr>
+        <tr><td>Días seguidos sin lluvia</td><td>0,25</td><td>20 días = 1</td></tr>
+        <tr><td>Déficit de lluvia de 30 días</td><td>0,25</td><td>20 % de lo normal = 1</td></tr>
+        <tr><td>Descenso de la humedad relativa, próximos 7 días</td><td>0,15</td><td>−10 puntos = 1</td></tr>
+        <tr><td><b>A · Actividad</b><br>(0 a 1)</td><td>Puntos de calor en la vereda en los últimos 30 días</td><td>0,15</td><td>3 o más = 1</td></tr>
+      </tbody>
+    </table>
+    <p>El factor <i>(0,4 + 0,6 × H)</i> hace que la susceptibilidad estructural de una vereda se amplifique cuando el pronóstico es caluroso y seco, y se atenúe sin desaparecer cuando las condiciones son normales. Los valores climáticos de cada vereda se obtienen por interpolación de los cuatro nodos más cercanos.</p>
+    <h3>Niveles de vigilancia</h3>
+    <table>
+      <thead><tr><th>Nivel</th><th>Criterio</th><th>Acción sugerida</th></tr></thead>
+      <tbody>
+        <tr><td><span class="estado vigilar">Vigilar de cerca</span></td><td>5 % de veredas con mayor índice</td><td>Verificación prioritaria, alistamiento y comunicación con la comunidad.</td></tr>
+        <tr><td><span class="estado atencion">Atención</span></td><td>Siguiente 10 %</td><td>Seguimiento diario de alertas y pronóstico.</td></tr>
+        <tr><td><span class="estado normal">Normal</span></td><td>Resto de veredas</td><td>Monitoreo rutinario.</td></tr>
+      </tbody>
+    </table>
+    <p>Cada vereda presenta las <b>razones</b> que explican su nivel (por ejemplo, anomalía de temperatura, días secos, recurrencia de fuego o alertas recientes) y si contiene páramo, área protegida o resguardo indígena. Los pesos de la versión 1.0 se calibrarán con los reportes verificados en campo que registre la aplicación de reportes del sistema.</p>
+
+    <h2 id="capas"><span class="nro">8</span>Capas de referencia</h2>
+    <p>Son de consulta obligatoria para la vigilancia: áreas protegidas del SINAP, páramos, Estructura Ecológica Principal (noviembre 2026), resguardos indígenas, ríos principales (orden de Strahler ≥ 5) y drenajes, vías primarias, secundarias y terciarias, límite municipal y centros poblados. Su simbología sigue convenciones cartográficas:</p>
+    <table>
+      <thead><tr><th>Capa</th><th>Símbolo</th><th>Capa</th><th>Símbolo</th></tr></thead>
+      <tbody>
+        <tr><td>Áreas protegidas SINAP</td><td><span class="chip"><i style="background:#2e7d32"></i>verde</span></td><td>Ríos y drenajes</td><td><span class="chip"><i style="background:#1565c0"></i>azul</span></td></tr>
+        <tr><td>Páramos</td><td><span class="chip"><i style="background:#7e57c2"></i>lila</span></td><td>Vías primarias / secundarias / terciarias</td><td><span class="chip"><i style="background:#c62828"></i>rojo</span> <span class="chip"><i style="background:#ef6c00"></i>naranja</span> <span class="chip"><i style="background:#f9a825"></i>amarillo</span></td></tr>
+        <tr><td>Resguardos indígenas</td><td><span class="chip"><i style="background:#a0522d"></i>marrón</span></td><td>Pérdida de bosque</td><td><span class="chip"><i style="background:#ad1457"></i>magenta</span></td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="actualizacion"><span class="nro">9</span>Frecuencia de actualización</h2>
+    <table>
+      <thead><tr><th>Proceso</th><th>Frecuencia</th></tr></thead>
+      <tbody>
+        <tr><td>Puntos de calor (FIRMS, IDEAM) e índice de priorización</td><td>Cada 3 horas</td></tr>
+        <tr><td>Alertas de pérdida de bosque y clima (anomalías y pronóstico)</td><td>Diaria (05:40, hora de Colombia)</td></tr>
+        <tr><td>Capas de referencia (EEP, resguardos, vías, hidrografía, DTD)</td><td>Mensual</td></tr>
+        <tr><td>Capas consultadas en línea (IDEAM, Corpocaldas, Hansen)</td><td>En cada consulta</td></tr>
+      </tbody>
+    </table>
+    <p>El encabezado del visor indica el tiempo transcurrido desde la última actualización, y cada módulo muestra la fecha de sus datos.</p>
+
+    <h2 id="limitaciones"><span class="nro">10</span>Alcances y limitaciones</h2>
+    <ul>
+      <li>Los puntos de calor y las alertas de pérdida de bosque son <b>indicios satelitales</b>; requieren verificación en campo antes de cualquier actuación.</li>
+      <li>La nubosidad persistente de la región andina reduce la detección óptica; las alertas de confianza nominal pueden incluir falsas detecciones.</li>
+      <li>Los satélites detectan incendios a partir de cierta extensión e intensidad; los eventos pequeños o bajo dosel pueden no registrarse.</li>
+      <li>Las anomalías climáticas comparan pronósticos con una línea base de reanálisis y pueden presentar sesgos sistemáticos; se recomienda contrastarlas con las estaciones del IDEAM y sus boletines.</li>
+      <li>El índice de priorización es una herramienta de apoyo a la decisión; no reemplaza el criterio técnico ni los protocolos de los consejos de gestión del riesgo.</li>
+      <li>La disponibilidad del sistema depende de los servicios de las entidades fuente.</li>
+    </ul>
+
+    <h2 id="protocolo"><span class="nro">11</span>Uso operativo recomendado</h2>
+    <ol>
+      <li>Revisar diariamente el módulo <b>Vigilancia</b> y las veredas en nivel <i>Vigilar de cerca</i>.</li>
+      <li>Consultar en <b>Incendios</b> las detecciones de las últimas 24 horas y verificar su ubicación respecto a áreas protegidas, páramos y resguardos.</li>
+      <li>Revisar semanalmente <b>Pérdida de bosque</b> filtrando por municipio y vereda, priorizando las alertas de confianza alta.</li>
+      <li>Usar el módulo <b>Clima</b> para anticipar ventanas de calor y sequía en los próximos 16 días.</li>
+      <li>Descargar las tablas (CSV) o generar el reporte imprimible para la coordinación interinstitucional.</li>
+      <li>Registrar el resultado de la verificación en campo en la aplicación de reportes.</li>
+    </ol>
+
+    <h2 id="glosario"><span class="nro">12</span>Glosario</h2>
+    <table><tbody>
+      <tr><td><b>Punto de calor</b></td><td>Píxel en el que un sensor satelital registra una temperatura anómalamente alta respecto a su entorno.</td></tr>
+      <tr><td><b>FRP</b></td><td>Potencia radiativa del fuego (MW); aproxima la intensidad de la combustión.</td></tr>
+      <tr><td><b>Alerta integrada</b></td><td>Alerta de pérdida de cobertura arbórea que combina varios sistemas ópticos y de radar.</td></tr>
+      <tr><td><b>Anomalía</b></td><td>Diferencia entre el valor actual o pronosticado y el valor normal para la misma fecha.</td></tr>
+      <tr><td><b>Déficit de presión de vapor</b></td><td>Medida de la sequedad del aire (kPa); valores altos favorecen la desecación de la vegetación.</td></tr>
+      <tr><td><b>Orden de Strahler</b></td><td>Jerarquía de un cauce dentro de la red de drenaje; los órdenes altos corresponden a ríos principales.</td></tr>
+      <tr><td><b>EEP</b></td><td>Estructura Ecológica Principal: conjunto de áreas que sostienen los procesos ecológicos esenciales del territorio.</td></tr>
+    </tbody></table>
+
+    <h2 id="citar"><span class="nro">13</span>Cómo citar y créditos</h2>
+    <div class="caja">Gobernación de Caldas – Secretaría de Medio Ambiente y Fundación para la Conservación de la Vida Silvestre en Colombia (FCV). (2026). <i>Vigía Fuego Caldas: Sistema de Alerta Temprana de Incendios y Deforestación del departamento de Caldas</i>. Versión 1.0.</div>
+    <p>Datos de: NASA FIRMS; IDEAM; Global Forest Watch y Universidad de Maryland; Hansen et al. (2013) <i>Science</i> 342: 850-853; MapBiomas Colombia; Corpocaldas; Agencia Nacional de Tierras; OpenStreetMap; Open-Meteo y Copernicus Climate Change Service (ERA5).</p>
+    <div class="creditos"><img src="app/img/logo-gobernacion.png" alt="Gobierno de Caldas · Secretaría de Medio Ambiente"><img src="app/img/logo-fcv.png" alt="Fundación para la Conservación de la Vida Silvestre en Colombia"></div>
+  </article>
+</div>
+<footer class="pie-doc">Vigía Fuego Caldas · Gobernación de Caldas – Secretaría de Medio Ambiente · Fundación para la Conservación de la Vida Silvestre en Colombia</footer>
+</body>
+</html>

@@ -1,4 +1,4 @@
-"""Descarga y recorta a Caldas las capas de referencia obligatorias del SAT-Caldas → data/capas/*.geojson
+"""Descarga y recorta a Caldas las capas de referencia obligatorias de Vigía Fuego Caldas → data/capas/*.geojson
 Se corre una vez y luego mensualmente (GitHub Actions). Uso:  python herramientas/preparar_capas.py [nombre ...]
 
 Capas:
@@ -34,7 +34,7 @@ def vias_osm():
     for srv in ('https://overpass-api.de/api/interpreter', 'https://maps.mail.ru/osm/tools/overpass/api/interpreter'):
         try:
             req = urllib.request.Request(srv, data=urllib.parse.urlencode({'data': q}).encode(),
-                                         headers={'User-Agent': 'SAT-Caldas/1.0 (datos abiertos)', 'Accept': 'application/json'})
+                                         headers={'User-Agent': 'VigiaFuego-Caldas/1.0 (datos abiertos)', 'Accept': 'application/json'})
             j = json.loads(urllib.request.urlopen(req, timeout=300).read()); break
         except Exception as ex: print('  Overpass', srv, ex)
     if not j: return {'type': 'FeatureCollection', 'features': []}
